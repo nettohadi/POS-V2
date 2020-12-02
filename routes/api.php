@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,3 +21,4 @@ use Illuminate\Support\Facades\Route;
 //    return $request->user();
 //});
 Route::resource('units', UnitController::class);
+Route::resource('categories', CategoryController::class);

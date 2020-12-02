@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Lib\MyResponse;
+use App\Libs\MyResponse;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,28 +11,29 @@ class UnitController extends Controller
 {
     public function index(){
         $units = Unit::all();
-        return MyResponse::make()->data($units)->send();
+        return MyResponse::make()->data($units)->json();
     }
 
     public function show()
     {
         $unit = Unit::find(request('unit'));
-        return $unit ? MyResponse::make()->data($unit)->send() : MyResponse::make()->isNotFound()->send();
+        return $unit ? MyResponse::make()->data($unit)->json() : MyResponse::make()->isNotFound()->json();
     }
 
     public function store(){
         $validator = Validator::make(request()->all(), $this->rule());
 
         if($validator->fails()){
-            return MyResponse::make()->data(request()->all())
+            return MyResponse::make()
+                   ->data(request()->all())
                    ->isNotValid($validator->errors())
-                   ->send();
+                   ->json();
 
         }
 
         $unit = Unit::create($validator->validated());
 
-        return MyResponse::make()->data($unit)->isCreated()->send();
+        return MyResponse::make()->data($unit)->isCreated()->json();
 
     }
 
@@ -41,19 +42,19 @@ class UnitController extends Controller
         $unit = Unit::find(request()->unit);
 
         //if unit is not found, return early
-        if(!$unit){return MyResponse::make()->isNotFound()->send();}
+        if(!$unit){return MyResponse::make()->isNotFound()->json();}
 
         $validator = Validator::make(request()->all(), $this->rule());
         if($validator->fails()){
             return MyResponse::make()->data(request()->all())
                 ->isNotValid($validator->errors())
-                ->send();
+                ->json();
 
         }
 
         $unit->update($validator->validated());
 
-        return MyResponse::make()->data($unit)->isUpdated()->send();
+        return MyResponse::make()->data($unit)->isUpdated()->json();
 
     }
 
@@ -62,12 +63,12 @@ class UnitController extends Controller
 
         //if unit is not found, return early
         if(!$unit){
-            return MyResponse::make()->isNotFound()->send();
+            return MyResponse::make()->isNotFound()->json();
         }
 
         Unit::destroy($unit->id);
 
-        return MyResponse::make()->isDeleted()->send();
+        return MyResponse::make()->isDeleted()->json();
     }
 
     private function rule(){

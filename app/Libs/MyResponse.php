@@ -1,7 +1,9 @@
 <?php
 
 
-namespace App\Lib;
+namespace App\Libs;
+
+use Illuminate\Support\Facades\Response;
 
 class MyResponse
 {
@@ -126,7 +128,7 @@ class MyResponse
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function send(){
+    public function json(){
         $response = [
             'code' => $this->appCode,
             'message' => $this->message,
@@ -135,6 +137,6 @@ class MyResponse
 
         if($this->errors){$response['errors'] = $this->errors;}
 
-        return response()->json($response,$this->httpStatus);
+        return Response::json($response,$this->httpStatus);
     }
 }

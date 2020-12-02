@@ -20,6 +20,7 @@ class CategoryControllerTest extends TestCase
     /** @test **/
     public function categories_can_be_retrieved()
     {
+        $this->withoutExceptionHandling();
         $categories = Category::factory()->count(7)->create();
 
         $response = $this->get(route('categories.index'));
@@ -30,8 +31,21 @@ class CategoryControllerTest extends TestCase
 
         $this->assertDatabaseCount($this->tableName,7);
         $this->assertDatabaseHas($this->tableName,
-            $categories->makeHidden(['created_at','updated_at'])
-                ->last()->toArray());
+                                $categories->makeHidden(['created_at','updated_at'])
+                                ->last()->toArray());
+
+    }
+
+    /** @test **/
+    public function category_can_be_found()
+    {
+        $this->withoutExceptionHandling();
+        $category = Category::factory()->create();
+
+        $response = $this->get(route('categories.show',['category' => $category->id]));
+
+        $response->assertStatus(200);
+        $this->assertEquals($category->toArray(),$response->json('data'));
 
     }
 }
