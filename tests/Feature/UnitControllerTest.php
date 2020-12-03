@@ -37,7 +37,27 @@ class UnitControllerTest extends TestCase
     }
 
     /** @test **/
-    public function unit_can_be_found()
+    public function units_can_be_retrieved_with_pagination()
+    {
+        $units = Unit::factory()->count(20)->create();
+
+        $response = $this->get(route('units.index'));
+
+        $response->assertStatus(200);
+
+        $this->assertCount(10,$response->json('data'));
+        $this->assertEquals($units->take(10)->toArray(),
+            $response->json('data'));
+
+        $this->assertDatabaseCount($this->tableName,20);
+        $this->assertDatabaseHas($this->tableName,
+            $units->makeHidden(['created_at','updated_at'])
+                ->last()->toArray());
+
+    }
+
+    /** @test **/
+    public function a_unit_can_be_found()
     {
         $this->withoutExceptionHandling();
         $unit = Unit::factory()->create();
@@ -50,7 +70,7 @@ class UnitControllerTest extends TestCase
     }
 
     /** @test **/
-    public function unit_can_not_be_found()
+    public function a_unit_can_not_be_found()
     {
         $this->withoutExceptionHandling();
         $unit = Unit::factory()->create();
@@ -63,7 +83,7 @@ class UnitControllerTest extends TestCase
     }
 
     /** @test **/
-    public function unit_can_be_inserted()
+    public function a_unit_can_be_inserted()
     {
         $this->withoutExceptionHandling();
 
@@ -101,7 +121,7 @@ class UnitControllerTest extends TestCase
     }
 
     /** @test **/
-    public function unit_can_be_updated()
+    public function a_unit_can_be_updated()
     {
         $this->withoutExceptionHandling();
 
@@ -125,7 +145,7 @@ class UnitControllerTest extends TestCase
     }
 
     /** @test **/
-    public function unit_can_not_be_updated_if_does_not_exist()
+    public function a_unit_can_not_be_updated_if_does_not_exist()
     {
         $this->withoutExceptionHandling();
 
@@ -184,7 +204,7 @@ class UnitControllerTest extends TestCase
     }
 
     /** @test **/
-    public function unit_can_be_deleted()
+    public function a_unit_can_be_deleted()
     {
         $this->withoutExceptionHandling();
 
@@ -201,7 +221,7 @@ class UnitControllerTest extends TestCase
     }
 
     /** @test **/
-    public function unit_can_not_be_deleted_if_does_not_exist()
+    public function a_unit_can_not_be_deleted_if_does_not_exist()
     {
         $this->withoutExceptionHandling();
 

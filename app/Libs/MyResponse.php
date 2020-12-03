@@ -3,6 +3,9 @@
 
 namespace App\Libs;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
 class MyResponse
@@ -22,6 +25,14 @@ class MyResponse
      * @var string
      */
     private $message = 'Berhasil menampilkan data';
+    /**
+     * @var array
+     */
+    private $links = null;
+    /**
+     * @var array
+     */
+    private $meta = null;
 
     function __construct(){
     }
@@ -46,6 +57,24 @@ class MyResponse
         $this->data = $data;
         $this->httpStatus = 200;
         $this->appCode = '00';
+        return $this;
+    }
+
+    /**
+     * Add pagination  in json response
+     * set http status to 200
+     *
+     * @param LengthAwarePaginator $paginator
+     * @return $this
+     */
+    public function paginator(LengthAwarePaginator $paginator){
+        $this->data = $paginator->all();
+        $this->httpStatus = 200;
+        $this->appCode = '00';
+
+        $this->links($paginator);
+        $this->meta($paginator);
+
         return $this;
     }
 
@@ -136,7 +165,34 @@ class MyResponse
         ];
 
         if($this->errors){$response['errors'] = $this->errors;}
+        if($this->links && $this->meta){$response['paginator']=[
+            'links' => $this->links,
+            'meta'  => $this->meta
+        ];}
 
         return Response::json($response,$this->httpStatus);
     }
+
+    private function links(LengthAwarePaginator $paginator){
+        $this->links = [
+            'first'=> "{$paginator->url(1)}",
+            'last' => "{$paginator->url($paginator->lastPage())}",
+            'prev' => "{$paginator->url(($paginator->currentPage() - 1))}",
+            'next' => "{$paginator->url(($paginator->currentPage() + 1))}"
+        ];
+    }
+
+    private function meta(LengthAwarePaginator $paginator)
+    {
+        $this->meta = [
+            'current_page'=> $paginator->currentPage(),
+            'last_page'   => $paginator->lastPage(),
+            'path'        => $paginator->path(),
+            'per_page'    => $paginator->perPage(),
+            'from'        => $paginator->firstItem(),
+            'to'          => $paginator->lastItem(),
+            'total'       => $paginator->total()
+        ];
+    }
+
 }

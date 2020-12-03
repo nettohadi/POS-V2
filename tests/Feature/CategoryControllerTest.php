@@ -37,7 +37,7 @@ class CategoryControllerTest extends TestCase
     }
 
     /** @test **/
-    public function category_can_be_found()
+    public function a_category_can_be_found()
     {
         $this->withoutExceptionHandling();
         $category = Category::factory()->create();

@@ -3,13 +3,17 @@
 namespace Tests\Unit;
 
 use App\Libs\MyResponse;
+use App\Models\Dummy;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\App;
 use Tests\TestCase;
 use Tests\CreatesApplication;
+use function GuzzleHttp\Psr7\get_message_body_summary;
 
 class MyResponseTest extends TestCase
 {
-    use CreatesApplication;
+    use CreatesApplication, RefreshDatabase;
 
     /** @test **/
     public function an_instance_can_be_made()
@@ -29,6 +33,43 @@ class MyResponseTest extends TestCase
         $response = MyResponse::make()->data($data);
 
         $this->assertEquals($data, $response->json()->getData(true)['data']);
+    }
+
+    /** @test **/
+    public function paginator_can_be_set()
+    {
+        $this->withoutExceptionHandling();
+
+        $perPage  = 10;
+        $total    = 30;
+        $lastPage = (int)(ceil($total / $perPage));
+
+        Dummy::factory()->count($total)->create();
+
+        $paginator = [
+            'links' => [
+                'first'=> 'http://api.dev/orders?page=1',
+                'last' => 'http://api.dev/orders?page='.$lastPage,
+                'prev' => 'http://api.dev/orders?page=1',
+                'next' => 'http://api.dev/orders?page=2'
+            ],
+            'meta' => [
+                'current_page'=> 1,
+                'last_page'   => $lastPage,
+                'path'        => 'http://api.dev/orders',
+                'per_page'    => $perPage,
+                'from'        => 1,
+                'to'          => 10,
+                'total'       => $total
+            ]
+        ];
+        $dummies = Dummy::paginate(10);
+        $dummies->setPath('http://api.dev/orders');
+
+        $jsonResponse = MyResponse::make()->paginator($dummies)->json();
+
+        $this->assertEquals($paginator,$jsonResponse->getData(true)['paginator']);
+
     }
 
     /** @test **/

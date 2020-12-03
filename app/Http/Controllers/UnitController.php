@@ -10,14 +10,16 @@ use Illuminate\Support\Facades\Validator;
 class UnitController extends Controller
 {
     public function index(){
-        $units = Unit::all();
-        return MyResponse::make()->data($units)->json();
+        $perPage = request()->input('perPage') ?? 10;
+        $units = Unit::paginate($perPage);
+        return MyResponse::make()->paginator($units)->json();
     }
 
     public function show()
     {
         $unit = Unit::find(request('unit'));
-        return $unit ? MyResponse::make()->data($unit)->json() : MyResponse::make()->isNotFound()->json();
+        return $unit ? MyResponse::make()->data($unit)->json()
+                     : MyResponse::make()->isNotFound()->json();
     }
 
     public function store(){
