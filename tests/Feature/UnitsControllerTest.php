@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class UnitControllerTest extends TestCase
+class UnitsControllerTest extends TestCase
 {
     use RefreshDatabase, withFaker;
     private $tableName = 'units';
@@ -37,23 +37,74 @@ class UnitControllerTest extends TestCase
     }
 
     /** @test **/
-    public function units_can_be_retrieved_with_pagination()
+    public function units_can_be_retrieved_with_pagination_default_perpage()
     {
+        /* 1. Setup --------------------------------*/
         $units = Unit::factory()->count(20)->create();
 
+        /* 2. Invoke --------------------------------*/
         $response = $this->get(route('units.index'));
 
+        /* 3. Assert --------------------------------*/
+        /* 3.1 Response */
         $response->assertStatus(200);
-
         $this->assertCount(10,$response->json('data'));
-        $this->assertEquals($units->take(10)->toArray(),
-            $response->json('data'));
+        $this->assertEquals($units->take(10)->toArray(), $response->json('data'));
 
+        /* 3.2 Database */
         $this->assertDatabaseCount($this->tableName,20);
         $this->assertDatabaseHas($this->tableName,
             $units->makeHidden(['created_at','updated_at'])
                 ->last()->toArray());
 
+    }
+
+    /** @test **/
+    public function units_can_be_retrieved_with_pagination_5_perpage()
+    {
+        /* 1. Setup --------------------------------*/
+        $units = Unit::factory()->count(20)->create();
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->get(route('units.index').'?perPage=5');
+
+        /* 3. Assert --------------------------------*/
+        /* 3.1 Response */
+        $response->assertStatus(200);
+        $this->assertCount(5,$response->json('data'));
+        $this->assertEquals($units->take(5)->toArray(), $response->json('data'));
+
+        /* 3.2 Database */
+        $this->assertDatabaseCount($this->tableName,20);
+        $this->assertDatabaseHas($this->tableName,
+            $units->makeHidden(['created_at','updated_at'])
+                ->last()->toArray());
+
+    }
+
+    /** @test **/
+    public function units_can_be_filtered_by_name()
+    {
+        /* 1. Setup ------------------------------ */
+
+        //Create two Units which has word 'liter'
+        Unit::factory()->create([
+            'name' => 'Liter'
+        ]);
+        Unit::factory()->create([
+            'name' => 'Mililiter'
+        ]);
+
+        //Create 10 random units
+        Unit::factory()->count(10)->create();
+
+        /* 2. Invoke ------------------------------ */
+        $route = route('units.index').'?name=liter';
+        $response = $this->get($route);
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(200);
+        $this->assertCount(2,$response->json('data'));
     }
 
     /** @test **/

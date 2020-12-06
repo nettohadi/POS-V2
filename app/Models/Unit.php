@@ -9,4 +9,11 @@ class Unit extends Model
 {
     use HasFactory;
     protected $fillable = ['name','desc'];
+
+    public function scopeFilterByName($query, $name){
+
+        if(empty($name)) return $query;
+
+        return $query->where('name','like',"%{$name}%");
+    }
 }

@@ -7,11 +7,13 @@ use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class UnitController extends Controller
+class UnitsController extends Controller
 {
     public function index(){
-        $perPage = request()->input('perPage') ?? 10;
-        $units = Unit::paginate($perPage);
+        $name    = request()->get('name') ?? null;
+        $perPage = request()->get('perPage') ?? 10;
+
+        $units = Unit::filterByName($name)->paginate($perPage);
         return MyResponse::make()->paginator($units)->json();
     }
 

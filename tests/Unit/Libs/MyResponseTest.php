@@ -5,11 +5,8 @@ namespace Tests\Unit;
 use App\Libs\MyResponse;
 use App\Models\Dummy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\App;
 use Tests\TestCase;
 use Tests\CreatesApplication;
-use function GuzzleHttp\Psr7\get_message_body_summary;
 
 class MyResponseTest extends TestCase
 {

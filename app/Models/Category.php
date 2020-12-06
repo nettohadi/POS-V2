@@ -9,4 +9,15 @@ class Category extends Model
 {
     use HasFactory;
     protected $fillable = ['name','desc','type_id'];
+
+    public function type(){
+        return $this->belongsTo(Type::class);
+    }
+
+    public function scopeFilterByName($query, $name){
+
+        if(empty($name)) return $query;
+
+        return $query->where('name','like',"%{$name}%");
+    }
 }
