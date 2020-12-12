@@ -2,24 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Libs\MyResponse;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Http\Resources\Product as ProductResource;
+use Illuminate\Support\Facades\Validator;
 
 class ProductsController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Return filterable paginated list of product.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        //
+        $perPage = request()->get('perPage');
+        $name = request()->get('name');
+        return MyResponse::make()->paginator(Product::filterByName($name)->paginate($perPage))->json();
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Return a single product which match the id.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create()
     {
@@ -27,25 +33,33 @@ class ProductsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created product in database.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request)
+    public function store()
     {
-        //
+        $validator = Validator::make(request()->all(),$this->rule());
+
+        if($validator->fails()){
+            return MyResponse::make()->isNotValid($validator->errors())->json();
+        }
+
+        return MyResponse::make()->data(Product::create($validator->validated()))->isCreated()->json();
     }
 
     /**
-     * Display the specified resource.
+     * Return the specified product.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
-        //
+        $product = Product::find($id);
+        return $product ? MyResponse::make()->data($product)->json()
+                        : MyResponse::make()->isNotFound()->json();
     }
 
     /**
@@ -80,5 +94,23 @@ class ProductsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    private function rule(){
+        return  [
+            'id' => 'required',
+            'barcode' => '',
+            'name' => 'required',
+            'name_initial' => '',
+            'unit_id' => 'required',
+            'category_id' => 'required',
+            'stock_type' => 'required',
+            'primary_ingredient_id' => '',
+            'primary_ingredient_qty' => '',
+            'for_sale' => 'required',
+            'image' => '',
+            'minimum_qty' => '',
+            'minimum_expiration_days' => ''
+        ];
     }
 }

@@ -60,7 +60,7 @@
        </div>
 </td>
        <td class="success small"><div align="right">100.00%</div></td>
-       <td class="success small"><div align="right">5&nbsp;/&nbsp;5</div></td>
+       <td class="success small"><div align="right">6&nbsp;/&nbsp;6</div></td>
        <td class="success small"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></td>
        <td class="success big">       <div class="progress">
          <div class="progress-bar bg-success" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100.00%">
@@ -69,7 +69,7 @@
        </div>
 </td>
        <td class="success small"><div align="right">100.00%</div></td>
-       <td class="success small"><div align="right">22&nbsp;/&nbsp;22</div></td>
+       <td class="success small"><div align="right">27&nbsp;/&nbsp;27</div></td>
       </tr>
 
       <tr>
@@ -89,8 +89,8 @@
        </div>
 </td>
        <td class="success small"><div align="right">100.00%</div></td>
-       <td class="success small"><div align="right">5&nbsp;/&nbsp;5</div></td>
-       <td class="success small">9</td>
+       <td class="success small"><div align="right">6&nbsp;/&nbsp;6</div></td>
+       <td class="success small">11</td>
        <td class="success big">       <div class="progress">
          <div class="progress-bar bg-success" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100.00%">
            <span class="sr-only">100.00% covered (success)</span>
@@ -98,7 +98,7 @@
        </div>
 </td>
        <td class="success small"><div align="right">100.00%</div></td>
-       <td class="success small"><div align="right">22&nbsp;/&nbsp;22</div></td>
+       <td class="success small"><div align="right">27&nbsp;/&nbsp;27</div></td>
       </tr>
 
       <tr>
@@ -186,7 +186,28 @@
       </tr>
 
       <tr>
-       <td class="success" colspan="4">&nbsp;<a href="#61"><abbr title="rule()">rule</abbr></a></td>
+       <td class="success" colspan="4">&nbsp;<a href="#61"><abbr title="destroy()">destroy</abbr></a></td>
+       <td class="success big">       <div class="progress">
+         <div class="progress-bar bg-success" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100.00%">
+           <span class="sr-only">100.00% covered (success)</span>
+         </div>
+       </div>
+</td>
+       <td class="success small"><div align="right">100.00%</div></td>
+       <td class="success small"><div align="right">1&nbsp;/&nbsp;1</div></td>
+       <td class="success small">2</td>
+       <td class="success big">       <div class="progress">
+         <div class="progress-bar bg-success" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100.00%">
+           <span class="sr-only">100.00% covered (success)</span>
+         </div>
+       </div>
+</td>
+       <td class="success small"><div align="right">100.00%</div></td>
+       <td class="success small"><div align="right">5&nbsp;/&nbsp;5</div></td>
+      </tr>
+
+      <tr>
+       <td class="success" colspan="4">&nbsp;<a href="#74"><abbr title="rule()">rule</abbr></a></td>
        <td class="success big">       <div class="progress">
          <div class="progress-bar bg-success" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100.00%">
            <span class="sr-only">100.00% covered (success)</span>
@@ -272,15 +293,28 @@
      <tr class="covered-by-large-tests popin"><td data-title="2 tests cover line 58" data-content="&lt;ul&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_updated&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::desc_is_not_required_during_update&lt;/li&gt;&lt;/ul&gt;" data-placement="top" data-html="true"><div align="right"><a name="58"></a><a href="#58">58</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">return</span><span class="default">&nbsp;</span><span class="default">MyResponse</span><span class="default">::</span><span class="default">make</span><span class="keyword">(</span><span class="keyword">)</span><span class="default">-&gt;</span><span class="default">data</span><span class="keyword">(</span><span class="default">$category</span><span class="keyword">)</span><span class="default">-&gt;</span><span class="default">isUpdated</span><span class="keyword">(</span><span class="keyword">)</span><span class="default">-&gt;</span><span class="default">json</span><span class="keyword">(</span><span class="keyword">)</span><span class="keyword">;</span></td></tr>
      <tr class="warning"><td><div align="right"><a name="59"></a><a href="#59">59</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">}</span></td></tr>
      <tr><td><div align="right"><a name="60"></a><a href="#60">60</a></div></td><td class="codeLine"></td></tr>
-     <tr><td><div align="right"><a name="61"></a><a href="#61">61</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">private</span><span class="default">&nbsp;</span><span class="keyword">function</span><span class="default">&nbsp;</span><span class="default">rule</span><span class="keyword">(</span><span class="keyword">)</span></td></tr>
-     <tr><td><div align="right"><a name="62"></a><a href="#62">62</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">{</span></td></tr>
-     <tr><td><div align="right"><a name="63"></a><a href="#63">63</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">return</span><span class="default">&nbsp;</span><span class="keyword">[</span></td></tr>
-     <tr class="covered-by-large-tests popin"><td data-title="11 tests cover line 64" data-content="&lt;ul&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_created&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::name_is_required_during_creation&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::desc_is_not_required_during_creation&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::type_is_required_during_creation&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::type_must_exist_in_database_during_creation&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_updated&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_not_be_updated_if_does_not_exist&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::name_is_required_during_update&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::type_is_required_during_update&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::type_must_exist_in_database_during_update&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::desc_is_not_required_during_update&lt;/li&gt;&lt;/ul&gt;" data-placement="top" data-html="true"><div align="right"><a name="64"></a><a href="#64">64</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="default">'name'</span><span class="default">&nbsp;</span><span class="default">=&gt;</span><span class="default">&nbsp;</span><span class="default">'required'</span><span class="keyword">,</span></td></tr>
-     <tr><td><div align="right"><a name="65"></a><a href="#65">65</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="default">'type_id'</span><span class="default">&nbsp;</span><span class="default">=&gt;</span><span class="default">&nbsp;</span><span class="default">'required|exists:types,id'</span><span class="keyword">,</span></td></tr>
-     <tr><td><div align="right"><a name="66"></a><a href="#66">66</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="default">'desc'</span><span class="default">&nbsp;</span><span class="default">=&gt;</span><span class="default">&nbsp;</span><span class="default">'nullable'</span></td></tr>
-     <tr><td><div align="right"><a name="67"></a><a href="#67">67</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">]</span><span class="keyword">;</span></td></tr>
-     <tr class="warning"><td><div align="right"><a name="68"></a><a href="#68">68</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">}</span></td></tr>
-     <tr><td><div align="right"><a name="69"></a><a href="#69">69</a></div></td><td class="codeLine"><span class="keyword">}</span></td></tr>
+     <tr><td><div align="right"><a name="61"></a><a href="#61">61</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">public</span><span class="default">&nbsp;</span><span class="keyword">function</span><span class="default">&nbsp;</span><span class="default">destroy</span><span class="keyword">(</span><span class="keyword">)</span><span class="keyword">{</span></td></tr>
+     <tr class="covered-by-large-tests popin"><td data-title="2 tests cover line 62" data-content="&lt;ul&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_deleted&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_not_be_deleted_if_does_not_exist&lt;/li&gt;&lt;/ul&gt;" data-placement="top" data-html="true"><div align="right"><a name="62"></a><a href="#62">62</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="default">$category</span><span class="default">&nbsp;</span><span class="keyword">=</span><span class="default">&nbsp;</span><span class="default">Category</span><span class="default">::</span><span class="default">find</span><span class="keyword">(</span><span class="default">request</span><span class="keyword">(</span><span class="default">'category'</span><span class="keyword">)</span><span class="keyword">)</span><span class="keyword">;</span></td></tr>
+     <tr><td><div align="right"><a name="63"></a><a href="#63">63</a></div></td><td class="codeLine"></td></tr>
+     <tr><td><div align="right"><a name="64"></a><a href="#64">64</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="comment">//if&nbsp;category&nbsp;is&nbsp;not&nbsp;found,&nbsp;return&nbsp;early</span></td></tr>
+     <tr class="covered-by-large-tests popin"><td data-title="2 tests cover line 65" data-content="&lt;ul&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_deleted&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_not_be_deleted_if_does_not_exist&lt;/li&gt;&lt;/ul&gt;" data-placement="top" data-html="true"><div align="right"><a name="65"></a><a href="#65">65</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">if</span><span class="keyword">(</span><span class="keyword">!</span><span class="default">$category</span><span class="keyword">)</span><span class="keyword">{</span></td></tr>
+     <tr class="covered-by-large-tests popin"><td data-title="1 test covers line 66" data-content="&lt;ul&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_not_be_deleted_if_does_not_exist&lt;/li&gt;&lt;/ul&gt;" data-placement="top" data-html="true"><div align="right"><a name="66"></a><a href="#66">66</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">return</span><span class="default">&nbsp;</span><span class="default">MyResponse</span><span class="default">::</span><span class="default">make</span><span class="keyword">(</span><span class="keyword">)</span><span class="default">-&gt;</span><span class="default">isNotFound</span><span class="keyword">(</span><span class="keyword">)</span><span class="default">-&gt;</span><span class="default">json</span><span class="keyword">(</span><span class="keyword">)</span><span class="keyword">;</span></td></tr>
+     <tr><td><div align="right"><a name="67"></a><a href="#67">67</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">}</span></td></tr>
+     <tr><td><div align="right"><a name="68"></a><a href="#68">68</a></div></td><td class="codeLine"></td></tr>
+     <tr class="covered-by-large-tests popin"><td data-title="1 test covers line 69" data-content="&lt;ul&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_deleted&lt;/li&gt;&lt;/ul&gt;" data-placement="top" data-html="true"><div align="right"><a name="69"></a><a href="#69">69</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="default">Category</span><span class="default">::</span><span class="default">destroy</span><span class="keyword">(</span><span class="default">$category</span><span class="default">-&gt;</span><span class="default">id</span><span class="keyword">)</span><span class="keyword">;</span></td></tr>
+     <tr><td><div align="right"><a name="70"></a><a href="#70">70</a></div></td><td class="codeLine"></td></tr>
+     <tr class="covered-by-large-tests popin"><td data-title="1 test covers line 71" data-content="&lt;ul&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_deleted&lt;/li&gt;&lt;/ul&gt;" data-placement="top" data-html="true"><div align="right"><a name="71"></a><a href="#71">71</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">return</span><span class="default">&nbsp;</span><span class="default">MyResponse</span><span class="default">::</span><span class="default">make</span><span class="keyword">(</span><span class="keyword">)</span><span class="default">-&gt;</span><span class="default">isDeleted</span><span class="keyword">(</span><span class="keyword">)</span><span class="default">-&gt;</span><span class="default">json</span><span class="keyword">(</span><span class="keyword">)</span><span class="keyword">;</span></td></tr>
+     <tr class="warning"><td><div align="right"><a name="72"></a><a href="#72">72</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">}</span></td></tr>
+     <tr><td><div align="right"><a name="73"></a><a href="#73">73</a></div></td><td class="codeLine"></td></tr>
+     <tr><td><div align="right"><a name="74"></a><a href="#74">74</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">private</span><span class="default">&nbsp;</span><span class="keyword">function</span><span class="default">&nbsp;</span><span class="default">rule</span><span class="keyword">(</span><span class="keyword">)</span></td></tr>
+     <tr><td><div align="right"><a name="75"></a><a href="#75">75</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">{</span></td></tr>
+     <tr><td><div align="right"><a name="76"></a><a href="#76">76</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">return</span><span class="default">&nbsp;</span><span class="keyword">[</span></td></tr>
+     <tr class="covered-by-large-tests popin"><td data-title="11 tests cover line 77" data-content="&lt;ul&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_created&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::name_is_required_during_creation&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::desc_is_not_required_during_creation&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::type_is_required_during_creation&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::type_must_exist_in_database_during_creation&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_be_updated&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::a_category_can_not_be_updated_if_does_not_exist&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::name_is_required_during_update&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::type_is_required_during_update&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::type_must_exist_in_database_during_update&lt;/li&gt;&lt;li class=&quot;covered-by-large-tests&quot;&gt;Tests\Feature\CategoriesControllerTest::desc_is_not_required_during_update&lt;/li&gt;&lt;/ul&gt;" data-placement="top" data-html="true"><div align="right"><a name="77"></a><a href="#77">77</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="default">'name'</span><span class="default">&nbsp;</span><span class="default">=&gt;</span><span class="default">&nbsp;</span><span class="default">'required'</span><span class="keyword">,</span></td></tr>
+     <tr><td><div align="right"><a name="78"></a><a href="#78">78</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="default">'type_id'</span><span class="default">&nbsp;</span><span class="default">=&gt;</span><span class="default">&nbsp;</span><span class="default">'required|exists:types,id'</span><span class="keyword">,</span></td></tr>
+     <tr><td><div align="right"><a name="79"></a><a href="#79">79</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="default">'desc'</span><span class="default">&nbsp;</span><span class="default">=&gt;</span><span class="default">&nbsp;</span><span class="default">'nullable'</span></td></tr>
+     <tr><td><div align="right"><a name="80"></a><a href="#80">80</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">]</span><span class="keyword">;</span></td></tr>
+     <tr class="warning"><td><div align="right"><a name="81"></a><a href="#81">81</a></div></td><td class="codeLine"><span class="default">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="keyword">}</span></td></tr>
+     <tr><td><div align="right"><a name="82"></a><a href="#82">82</a></div></td><td class="codeLine"><span class="keyword">}</span></td></tr>
 
     </tbody>
    </table>
@@ -293,7 +327,7 @@
      <span class="warning"><strong>Dead Code</strong></span>
     </p>
     <p>
-     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 7.0.12</a> using <a href="https://secure.php.net/" target="_top">PHP 7.4.12</a> with <a href="https://xdebug.org/">Xdebug 3.0.0</a> and <a href="https://phpunit.de/">PHPUnit 8.5.11</a> at Sun Dec 6 10:00:37 UTC 2020.</small>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 7.0.12</a> using <a href="https://secure.php.net/" target="_top">PHP 7.4.12</a> with <a href="https://xdebug.org/">Xdebug 3.0.0</a> and <a href="https://phpunit.de/">PHPUnit 8.5.11</a> at Thu Dec 10 18:35:06 WIB 2020.</small>
     </p>
     <a title="Back to the top" id="toplink" href="#">
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M12 11L6 5l-6 6h12z"/></svg>

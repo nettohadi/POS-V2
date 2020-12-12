@@ -58,6 +58,19 @@ class CategoriesController extends Controller
         return MyResponse::make()->data($category)->isUpdated()->json();
     }
 
+    public function destroy(){
+        $category = Category::find(request('category'));
+
+        //if category is not found, return early
+        if(!$category){
+            return MyResponse::make()->isNotFound()->json();
+        }
+
+        Category::destroy($category->id);
+
+        return MyResponse::make()->isDeleted()->json();
+    }
+
     private function rule()
     {
         return [
