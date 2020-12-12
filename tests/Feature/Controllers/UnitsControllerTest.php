@@ -261,9 +261,6 @@ class UnitsControllerTest extends TestCase
 
         $unit = Unit::factory()->create();
 
-        $this->assertDatabaseHas($this->tableName, $unit->makeHidden(['created_at','updated_at'])
-            ->toArray());
-
         $response = $this->delete(route('units.destroy',['unit'=>$unit->id]));
 
         $response->assertStatus(200);

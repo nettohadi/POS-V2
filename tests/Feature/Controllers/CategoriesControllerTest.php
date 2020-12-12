@@ -454,6 +454,40 @@ class CategoriesControllerTest extends TestCase
 
     }
 
+    /** @test **/
+    public function a_category_can_be_deleted()
+    {
+        $this->withoutExceptionHandling();
+
+        /* Setup -----------------------------------------------*/
+        $category = Category::factory()->create();
+
+        /* Invoke -----------------------------------------------*/
+        $response = $this->delete(route('categories.destroy',['category'=>$category->id]));
+
+        /* Assert -----------------------------------------------*/
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing($this->tableName, $category->makeHidden(['created_at','updated_at'])
+            ->toArray());
+    }
+
+    /** @test **/
+    public function a_category_can_not_be_deleted_if_does_not_exist()
+    {
+        $this->withoutExceptionHandling();
+
+        /* Setup -----------------------------------------------*/
+        $category = Category::factory()->create();
+
+        /* Invoke -----------------------------------------------*/
+        /* There is no Category with an id of 99 */
+        $response = $this->delete(route('categories.destroy',['category'=> 99]));
+
+        /* Assert -----------------------------------------------*/
+        $response->assertStatus(404);
+        $this->assertNull($response->json('data'));
+    }
+
     private function setupData(){
         $type = Type::create([
             'name' => 'Paket',
