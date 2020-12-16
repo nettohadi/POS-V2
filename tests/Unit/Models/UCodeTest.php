@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Libs;
+namespace Tests\Unit\Models;
 
 use App\Models\UCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +26,8 @@ class UCodeTest extends TestCase
 
         /* 2. Invoke --------------------------------*/
         //invoke with a non existing string
-        $newCode = UCode::generate('HUMA-');
+        $ucode = new UCode();
+        $newCode = $ucode->generate('HUMA-');
 
         /* 3. Assert --------------------------------*/
         $this->assertEquals('HUMA-1',$newCode);
@@ -47,7 +48,8 @@ class UCodeTest extends TestCase
         ]);
 
         /* 2. Invoke --------------------------------*/
-        $newCode = UCode::generate('HUM-');
+        $ucode = new UCode();
+        $newCode = $ucode->generate('HUM-');
 
         /* 3. Assert --------------------------------*/
         $this->assertEquals('HUM-6',$newCode);

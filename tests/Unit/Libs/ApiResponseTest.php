@@ -1,22 +1,22 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Libs;
 
-use App\Libs\MyResponse;
+use App\Libs\ApiResponse;
 use App\Models\Dummy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\CreatesApplication;
 
-class MyResponseTest extends TestCase
+class ApiResponseTest extends TestCase
 {
     use CreatesApplication, RefreshDatabase;
 
     /** @test **/
     public function an_instance_can_be_made()
     {
-        $myResponse = MyResponse::make();
-        $this->assertEquals(new MyResponse(), $myResponse);
+        $myResponse = ApiResponse::make();
+        $this->assertEquals(new ApiResponse(), $myResponse);
     }
 
     /** @test **/
@@ -27,7 +27,7 @@ class MyResponseTest extends TestCase
             'prop2' => 'test2'
         ];
 
-        $response = MyResponse::make()->data($data);
+        $response = ApiResponse::make()->data($data);
 
         $this->assertEquals($data, $response->json()->getData(true)['data']);
     }
@@ -63,7 +63,7 @@ class MyResponseTest extends TestCase
         $dummies = Dummy::paginate(10);
         $dummies->setPath('http://api.dev/orders');
 
-        $jsonResponse = MyResponse::make()->paginator($dummies)->json();
+        $jsonResponse = ApiResponse::make()->paginator($dummies)->json();
 
         $this->assertEquals($paginator,$jsonResponse->getData(true)['paginator']);
 
@@ -77,7 +77,7 @@ class MyResponseTest extends TestCase
           'type' => 'should exist'
         ];
 
-        $response = MyResponse::make()->errors($errors);
+        $response = ApiResponse::make()->errors($errors);
 
         $this->assertEquals($errors,$response->json()->getData(true)['errors']);
     }
@@ -90,7 +90,7 @@ class MyResponseTest extends TestCase
             'type' => 'should exist'
         ];
 
-        $jsonResponse = MyResponse::make()->isNotValid($errors)->json();
+        $jsonResponse = ApiResponse::make()->isNotValid($errors)->json();
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(400,$jsonResponse->getStatusCode());
@@ -102,7 +102,7 @@ class MyResponseTest extends TestCase
     /** @test **/
     public function can_return_notFound_response()
     {
-        $jsonResponse = MyResponse::make()->isNotFound()->json();
+        $jsonResponse = ApiResponse::make()->isNotFound()->json();
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(404,$jsonResponse->getStatusCode());
@@ -113,7 +113,7 @@ class MyResponseTest extends TestCase
     /** @test **/
     public function can_return_isCreated_response()
     {
-        $jsonResponse = MyResponse::make()->isCreated()->json();
+        $jsonResponse = ApiResponse::make()->isCreated()->json();
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(201,$jsonResponse->getStatusCode());
@@ -124,7 +124,7 @@ class MyResponseTest extends TestCase
     /** @test **/
     public function can_return_isUpdated_response()
     {
-        $jsonResponse = MyResponse::make()->isUpdated()->json();
+        $jsonResponse = ApiResponse::make()->isUpdated()->json();
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(200,$jsonResponse->getStatusCode());
@@ -135,7 +135,7 @@ class MyResponseTest extends TestCase
     /** @test **/
     public function can_return_isDeleted_response()
     {
-        $jsonResponse = MyResponse::make()->isDeleted()->json();
+        $jsonResponse = ApiResponse::make()->isDeleted()->json();
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(200,$jsonResponse->getStatusCode());

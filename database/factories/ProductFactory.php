@@ -32,7 +32,7 @@ class ProductFactory extends Factory
             'primary_ingredient_id' => $this->faker->unique()->word(),
             'primary_ingredient_qty' => $this->faker->randomNumber(),
             'for_sale' => (rand(0,1) == 1),
-            'image' => '',
+            'image' => null,
             'minimum_qty' => 0,
             'minimum_expiration_days' => 0,
             'updated_at' => null,

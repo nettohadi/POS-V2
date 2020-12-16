@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends BaseModel
 {
     use HasFactory;
-    protected $fillable = ['name','desc','type_id'];
+    protected $guarded = [];
 
     public function type(){
         return $this->belongsTo(Type::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
     }
 
     public function scopeFilterByName($query, $name){

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Models;
 
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,21 +14,25 @@ class CategoryTest extends TestCase
     /** @test **/
     public function can_be_filtered_by_name()
     {
-
-        Category::factory()->create([
+        $expectedCategories = [];
+        //create two categories which contain the word 'Paket'
+        $expectedCategories[] = Category::factory()->create([
             'name' => 'Paket Hemat'
-        ]);
-        Category::factory()->create([
+        ])->toArray();
+
+        $expectedCategories[] = Category::factory()->create([
             'name' => 'Paket Geprek'
-        ]);
+        ])->toArray();
+        //-------------------------------------------------
 
         //Create 10 random categories
-        Category::factory()->count(10)->create();
+        Category::factory()->count(5)->create();
 
         /* 2. Invoke ------------------------------ */
-        $categories = Category::filterByName('paket')->get();
+        $categories = Category::filterByName('paket')->get()->toArray();
 
         /* 3. Assert --------------------------------*/
         $this->assertCount(2,$categories);
+        $this->assertEquals($expectedCategories, $categories);
     }
 }

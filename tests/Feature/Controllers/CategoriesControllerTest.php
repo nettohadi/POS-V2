@@ -1,24 +1,19 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Controllers;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\Type;
-use Database\Factories\CategoryFactory;
-use Database\Factories\TypeFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Tests\CreatesApplication;
 use Tests\TestCase;
 
 class CategoriesControllerTest extends TestCase
 {
-    use RefreshDatabase, withFaker;
+    use  RefreshDatabase, withFaker;
     private $tableName = 'categories';
-
-    function __construct()
-    {
-        parent::__construct();
-    }
 
     /** @test **/
     public function categories_can_be_retrieved()
@@ -132,23 +127,69 @@ class CategoriesControllerTest extends TestCase
     }
 
     /** @test **/
-    public function a_category_can_be_created()
+    public function a_category_can_be_inserted()
     {
         $this->withoutExceptionHandling();
 
         /* 1. Setup --------------------------------*/
-        $type = Type::create([
-            'name' => 'Paket',
-            'desc' => 'Paket Makanan'
-        ]);
+        $category = $this->makeCategory();
 
-        $category = [
-            'id' => 1,
-            'name' => 'Paket Hemat',
-            'desc' => 'Paket Murah Meriah',
-            'type_id' => '1',
-            'type' => $type->toArray()
-        ];
+        /* 2. Invoke --------------------------------*/
+        $response = $this->post(route('categories.store'),$category);
+
+        /* 3. Assert --------------------------------*/
+        /* 3.2 Response */
+        $response->assertStatus(201);
+
+        $result = $response->json();
+        $data = $result['data'];
+        $this->removeTimeStamp($data);
+
+        $this->assertArrayNotHasKey('errors', $result);
+        $this->assertEquals($category, $data);
+
+        /* 3.2 Database */
+        $this->assertDatabaseHas($this->tableName, $category);
+        $this->assertDatabaseHas('types',['id' => $category['type_id']]);
+
+    }
+
+    /** @test **/
+    public function name_is_required_during_insert()
+    {
+        $this->withoutExceptionHandling();
+
+        /* 1. Setup --------------------------------*/
+        $category = $this->makeCategory();
+        $category['name'] = '';
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->post(route('categories.store'),$category);
+
+        /* 3. Assert --------------------------------*/
+        /* 3.2 Response */
+        $response->assertStatus(400);
+
+        $result = $response->json();
+
+
+        $this->assertArrayHasKey('errors', $result);
+        $this->assertNotNull($result['errors']);
+        $this->assertArrayHasKey('name', $result['errors']);
+
+        /* 3.2 Database */
+        unset($category['type']);
+        $this->assertDatabaseMissing($this->tableName, $category);
+    }
+
+    /** @test **/
+    public function desc_is_not_required_during_insert()
+    {
+        $this->withoutExceptionHandling();
+
+        /* 1. Setup --------------------------------*/
+        $category = $this->makeCategory();
+        $category['desc'] = null;
 
         /* 2. Invoke --------------------------------*/
         $response = $this->post(route('categories.store',$category));
@@ -158,63 +199,26 @@ class CategoriesControllerTest extends TestCase
         $response->assertStatus(201);
 
         $result = $response->json();
-        unset($result['data']['created_at']);
-        unset($result['data']['updated_at']);
+
+
+        $this->removeTimeStamp($result['data']);
 
         $this->assertArrayNotHasKey('errors', $result);
         $this->assertEquals($category, $result['data']);
 
         /* 3.2 Database */
-        unset($category['type']);
-        $this->assertDatabaseHas($this->tableName, $category);
-        $this->assertDatabaseHas('types',['id' => $type->id, 'name' => $type->name]);
-
-    }
-
-    /** @test **/
-    public function name_is_required_during_creation()
-    {
-        $this->assert_name_is_required('categories.store');
-    }
-
-    /** @test **/
-    public function desc_is_not_required_during_creation()
-    {
-        $this->withoutExceptionHandling();
-
-        /* 1. Setup --------------------------------*/
-        $category = $this->setupData();
-        unset($category['desc']);
-
-        /* 2. Invoke --------------------------------*/
-        $response = $this->post(route('categories.store',$category));
-
-        /* 3. Assert --------------------------------*/
-        /* 3.2 Response */
-        $response->assertStatus(201);
-
-        $result = $response->json();
-        unset($result['data']['created_at']);
-        unset($result['data']['updated_at']);
-
-
-
-        $this->assertArrayNotHasKey('errors', $result);
-        $this->assertEquals($category, $result['data']);
-
-        /* 3.2 Database */
-        unset($category['type']);
+        $this->removeColumn($category,['type']);
         $this->assertDatabaseHas($this->tableName, $category);
     }
 
     /** @test **/
-    public function type_is_required_during_creation()
+    public function type_is_required_during_insert()
     {
         $this->withoutExceptionHandling();
 
         /* 1. Setup --------------------------------*/
-        $category = $this->setupData();
-        $category['type_id'] = '';
+        $category = $this->makeCategory();
+        $category['type_id'] = null;
 
         /* 2. Invoke --------------------------------*/
         $response = $this->post(route('categories.store',$category));
@@ -237,13 +241,13 @@ class CategoriesControllerTest extends TestCase
     }
 
     /** @test **/
-    public function type_must_exist_in_database_during_creation()
+    public function type_must_exist_in_database_during_insert()
     {
         $this->withoutExceptionHandling();
 
         /* 1. Setup --------------------------------*/
-        $category = $this->setupData();
-        $category['type_id'] = 10;
+        $category = $this->makeCategory();
+        $category['type_id'] = 'random_id';
 
         /* 2. Invoke --------------------------------*/
         $response = $this->post(route('categories.store',$category));
@@ -363,11 +367,10 @@ class CategoriesControllerTest extends TestCase
         $category = Category::create([
             'name' => 'name',
             'desc' => 'desc',
-            'type_id' => null
+            'type_id' => $type->id
         ])->toArray();
 
-        $category['name'] = '';
-        $category['desc'] = 'New desc';
+        $category['type_id'] = null;
 
         $response = $this->put(route('categories.update',
             ['category' => $category['id']]),
@@ -488,7 +491,29 @@ class CategoriesControllerTest extends TestCase
         $this->assertNull($response->json('data'));
     }
 
-    private function setupData(){
+    /** @test **/
+    public function a_category_can_not_be_deleted_if_has_one_or_more_products()
+    {
+        $this->withoutExceptionHandling();
+
+        /* 1.Setup ----------------------------------------------------------*/
+        $category = Category::factory()->create()->toArray();
+        Product::factory()->count(1)->create(['category_id' => $category['id']]);
+
+        /* 2.Invoke ----------------------------------------------------------*/
+        $response = $this->delete(route('categories.destroy',['category'=> $category['id']]));
+
+        /* 3.Assert ----------------------------------------------------------*/
+        /* 3.1 Response ----------------------------------------------------------*/
+        $response->assertStatus(400);
+
+        /* 3.2 Database ----------------------------------------------------------*/
+        $this->removeTimeStamp($category);
+        $this->assertDatabaseHas($this->tableName, $category);
+
+    }
+
+    private function makeCategory(){
         $type = Type::create([
             'name' => 'Paket',
             'desc' => 'Paket Makanan'
@@ -498,39 +523,16 @@ class CategoriesControllerTest extends TestCase
             'id' => 1,
             'name' => 'Paket',
             'desc' => 'Paket Murah Meriah',
-            'type_id' => '1',
-            'type' => $type->toArray()
+            'type_id' => $type->id
         ];
 
         return $category;
     }
 
     private function assert_name_is_required($routeName){
-        $this->withoutExceptionHandling();
 
-        /* 1. Setup --------------------------------*/
-        $category = $this->setupData();
-        $category['name'] = '';
-
-        /* 2. Invoke --------------------------------*/
-        $response = $this->post(route($routeName,$category));
-
-        /* 3. Assert --------------------------------*/
-        /* 3.2 Response */
-        $response->assertStatus(400);
-
-        $result = $response->json();
-        unset($result['data']['created_at']);
-        unset($result['data']['updated_at']);
-
-        $this->assertArrayHasKey('errors', $result);
-        $this->assertNotNull($result['errors']);
-        $this->assertArrayHasKey('name', $result['errors']);
-
-        /* 3.2 Database */
-        unset($category['type']);
-        $this->assertDatabaseMissing($this->tableName, $category);
     }
+
 
 
 }

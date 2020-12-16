@@ -33,21 +33,22 @@ class CreateProductsTable extends Migration
 
             $table->string('primary_ingredient_id',20)
                   ->comment("is used to determine the qty of a composite product.
-                  one to many relationship with products table");
+                  one to many relationship with products table")->nullable();
 
             $table->bigInteger('primary_ingredient_qty')
-                  ->comment("is used to determine the qty of a composite product");;
+                  ->comment("is used to determine the qty of a composite product")->nullable();
 
             $table->boolean('for_sale');
 
             $table->string('image',100)->nullable();
 
             $table->integer('minimum_qty')
-                  ->comment("User will be informed when product qty is below the minimum_qty");
+                  ->comment("User will be informed when product qty is below the minimum_qty")
+                  ->nullable();
 
             $table->integer('minimum_expiration_days')
                   ->comment("User wil be informed when days to expiration date is equal or
-                  less than 'minimum_expiration_days'");
+                  less than 'minimum_expiration_days'")->nullable();
 
             $table->timestamps();
         });

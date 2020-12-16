@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Models;
 
 use App\Models\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,22 +14,26 @@ class UnitTest extends TestCase
     /** @test **/
     public function can_be_filtered_by_name()
     {
+        $expectedUnits = [];
 
-        Unit::factory()->create([
-            'name' => 'Paket Hemat'
-        ]);
+        //create two units which contain the word 'liter'
+        $expectedUnits[] = Unit::factory()->create([
+            'name' => 'Liter'
+        ])->toArray();
 
-        Unit::factory()->create([
-            'name' => 'Paket Geprek'
-        ]);
+        $expectedUnits[] = Unit::factory()->create([
+            'name' => 'Mililiter'
+        ])->toArray();
+        //---------------------------------------------
 
         //Create 10 random units
         Unit::factory()->count(10)->create();
 
         /* 2. Invoke ------------------------------ */
-        $units = Unit::filterByName('paket')->get();
+        $units = Unit::filterByName('liter')->get()->toArray();
 
         /* 3. Assert --------------------------------*/
         $this->assertCount(2,$units);
+        $this->assertEquals($expectedUnits, $units);
     }
 }

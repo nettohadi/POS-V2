@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Libs\MyResponse;
+use App\Libs\ApiResponse;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -15,15 +15,15 @@ class CategoriesController extends Controller
         $perPage = request()->get('perPage') ?? 10;
 
         $category = Category::filterByName($name)->with('type')->paginate($perPage);
-        return MyResponse::make()->paginator($category)->json();
+        return ApiResponse::make()->paginator($category)->json();
     }
 
     public function show()
     {
         $category = Category::with('type')->find(request('category'));
         return $category
-            ? MyResponse::make()->data($category)->json()
-            : MyResponse::make()->isNotFound()->json();
+            ? ApiResponse::make()->data($category)->json()
+            : ApiResponse::make()->isNotFound()->json();
     }
 
     public function store()
@@ -31,12 +31,13 @@ class CategoriesController extends Controller
         $validator = Validator::make(request()->all(),$this->rule());
 
         if($validator->fails()){
-            return MyResponse::make()->isNotValid($validator->errors())->json();
+            return ApiResponse::make()->isNotValid($validator->errors())->json();
         }
 
-        $category = Category::create($validator->validated())->load('type');
+        $category = Category::create($validator->validated());
+        $category = Category::find($category->id);
 
-        return MyResponse::make()->data($category)->isCreated()->json();
+        return ApiResponse::make()->data($category)->isCreated()->json();
     }
 
     public function update()
@@ -44,31 +45,37 @@ class CategoriesController extends Controller
         $validator = Validator::make(request()->all(),$this->rule());
 
         if($validator->fails()){
-            return MyResponse::make()->isNotValid($validator->errors())->json();
+            return ApiResponse::make()->isNotValid($validator->errors())->json();
         }
 
         $category = Category::find(request('category'));
 
         if(!$category){
-            return MyResponse::make()->isNotFound()->json();
+            return ApiResponse::make()->isNotFound()->json();
         }
 
         $category->update($validator->validated());
 
-        return MyResponse::make()->data($category)->isUpdated()->json();
+        return ApiResponse::make()->data($category)->isUpdated()->json();
     }
 
     public function destroy(){
         $category = Category::find(request('category'));
 
-        //if category is not found, return early
+        //if category is not found, abort
         if(!$category){
-            return MyResponse::make()->isNotFound()->json();
+            return ApiResponse::make()->isNotFound()->json();
+        }
+
+        //if category has one or more products, abort
+        if($category->products->first()){
+            $message = 'Kategori tidak bisa dihapus karena ada produk yg terhubung dengan kategori ini';
+            return ApiResponse::make()->isNotAllowed($message)->json();
         }
 
         Category::destroy($category->id);
 
-        return MyResponse::make()->isDeleted()->json();
+        return ApiResponse::make()->isDeleted()->json();
     }
 
     private function rule()
@@ -76,7 +83,7 @@ class CategoriesController extends Controller
         return [
             'name' => 'required',
             'type_id' => 'required|exists:types,id',
-            'desc' => 'nullable'
+            'desc' => ''
         ];
     }
 }

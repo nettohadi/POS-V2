@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Libs\MyResponse;
+use App\Libs\ApiResponse;
 use App\Models\Product;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Resources\Product as ProductResource;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ProductsController extends Controller
@@ -19,17 +21,7 @@ class ProductsController extends Controller
     {
         $perPage = request()->get('perPage');
         $name = request()->get('name');
-        return MyResponse::make()->paginator(Product::filterByName($name)->paginate($perPage))->json();
-    }
-
-    /**
-     * Return a single product which match the id.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function create()
-    {
-        //
+        return ApiResponse::make()->paginator(Product::filterByName($name)->paginate($perPage))->json();
     }
 
     /**
@@ -43,10 +35,16 @@ class ProductsController extends Controller
         $validator = Validator::make(request()->all(),$this->rule());
 
         if($validator->fails()){
-            return MyResponse::make()->isNotValid($validator->errors())->json();
+            return ApiResponse::make()->isNotValid($validator->errors())->json();
         }
 
-        return MyResponse::make()->data(Product::create($validator->validated()))->isCreated()->json();
+        //get validated product
+        $data = $validator->validated();
+
+        //upload & set image path on data if image exist
+        $this->uploadIfImageExists($data);
+
+        return ApiResponse::make()->data(Product::create($data))->isCreated()->json();
     }
 
     /**
@@ -58,42 +56,55 @@ class ProductsController extends Controller
     public function show($id)
     {
         $product = Product::find($id);
-        return $product ? MyResponse::make()->data($product)->json()
-                        : MyResponse::make()->isNotFound()->json();
+        return $product ? ApiResponse::make()->data($product)->json()
+                        : ApiResponse::make()->isNotFound()->json();
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Update the specified product
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id)
+    public function update()
     {
-        //
-    }
+        //if product is not found
+        if(! $product = Product::find(request('product'))){
+            //Return early
+            return ApiResponse::make()->isNotFound()->json();
+        }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
+        $validator = Validator::make(request()->all(), $this->rule());
+        if($validator->fails()){
+            return ApiResponse::make()->data(request()->all())
+                ->isNotValid($validator->errors())
+                ->json();
+        }
+
+        //get validated product data
+        $data = $validator->validated();
+
+        //upload & set image path on product if image exist
+        $this->uploadIfImageExists($data);
+
+        $product->update($data);
+
+        return ApiResponse::make()->data($product)->isUpdated()->json();
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  int  $product
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public function destroy()
     {
-        //
+        $product = Product::find(request('product'));
+
+        if(!$product) return ApiResponse::make()->isNotFound()->json();
+
+        $product->delete();
+
+        return ApiResponse::make()->isDeleted()->json();
     }
 
     private function rule(){
@@ -102,15 +113,32 @@ class ProductsController extends Controller
             'barcode' => '',
             'name' => 'required',
             'name_initial' => '',
-            'unit_id' => 'required',
-            'category_id' => 'required',
-            'stock_type' => 'required',
+            'unit_id' => 'required|numeric|exists:units,id',
+            'category_id' => 'required|numeric|exists:categories,id',
+            'stock_type' => 'required|string|in:single,composite',
             'primary_ingredient_id' => '',
             'primary_ingredient_qty' => '',
-            'for_sale' => 'required',
-            'image' => '',
+            'for_sale' => 'required|boolean',
+            'image' => 'nullable|image',
             'minimum_qty' => '',
             'minimum_expiration_days' => ''
         ];
+    }
+
+    private function uploadIfImageExists(array &$data)
+    {
+        if(!$data) return;
+
+        if((request()->file('image'))){
+            $imageFile = request()->file('image');
+            $path = "/products";
+            $newFileName = Product::generateImageName('product',$imageFile->getClientOriginalExtension());
+
+            $isUploaded = Storage::disk('public')->putFileAs($path, $imageFile, $newFileName);
+            $data['image'] = $isUploaded ? $path.'/'.$newFileName : null;
+        }else{
+            //if image is nul, remove image
+            unset($data['image']);
+        }
     }
 }

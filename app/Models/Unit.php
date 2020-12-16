@@ -16,4 +16,8 @@ class Unit extends BaseModel
 
         return $query->where('name','like',"%{$name}%");
     }
+
+    public function products(){
+        return $this->hasMany(Product::class);
+    }
 }

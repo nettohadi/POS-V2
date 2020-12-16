@@ -12,7 +12,7 @@ class UCode extends BaseModel
     protected $table = 'ucodes';
     protected $guarded = [];
 
-    public static function generate(string $str)
+    public function generate(string $str)
     {
         $uCode = self::updateOrCreate(['str' => $str], ['str' => $str]);
         $uCode->increment('last_order');

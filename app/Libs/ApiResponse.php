@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
-class MyResponse
+class ApiResponse
 {
 
     private $data = null;
@@ -40,10 +40,10 @@ class MyResponse
     /**
      * Create new MyResponse instance.
      *
-     * @return MyResponse instance
+     * @return ApiResponse instance
      */
     public static function make(){
-        return new MyResponse();
+        return new ApiResponse();
     }
 
     /**
@@ -126,6 +126,18 @@ class MyResponse
         $this->message = 'Berhasil memperbaharui data';
         $this->appCode = '00';
         $this->httpStatus = 200;
+        return $this;
+    }
+
+    /**
+     * Set http response to 400 (bad request)
+     *
+     * @return $this
+     */
+    public function isNotAllowed($message=null){
+        $this->message = $message ?? 'Permintaan anda ditolak';
+        $this->appCode = '04';
+        $this->httpStatus = 400;
         return $this;
     }
 

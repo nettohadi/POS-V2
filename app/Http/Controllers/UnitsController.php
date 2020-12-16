@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Libs\MyResponse;
+use App\Libs\ApiResponse;
 use App\Models\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,21 +15,21 @@ class UnitsController extends Controller
         $perPage = request()->get('perPage') ?? 10;
 
         $units = Unit::filterByName($name)->paginate($perPage);
-        return MyResponse::make()->paginator($units)->json();
+        return ApiResponse::make()->paginator($units)->json();
     }
 
     public function show()
     {
         $unit = Unit::find(request('unit'));
-        return $unit ? MyResponse::make()->data($unit)->json()
-                     : MyResponse::make()->isNotFound()->json();
+        return $unit ? ApiResponse::make()->data($unit)->json()
+                     : ApiResponse::make()->isNotFound()->json();
     }
 
     public function store(){
         $validator = Validator::make(request()->all(), $this->rule());
 
         if($validator->fails()){
-            return MyResponse::make()
+            return ApiResponse::make()
                    ->data(request()->all())
                    ->isNotValid($validator->errors())
                    ->json();
@@ -38,7 +38,7 @@ class UnitsController extends Controller
 
         $unit = Unit::create($validator->validated());
 
-        return MyResponse::make()->data($unit)->isCreated()->json();
+        return ApiResponse::make()->data($unit)->isCreated()->json();
 
     }
 
@@ -47,11 +47,11 @@ class UnitsController extends Controller
         $unit = Unit::find(request()->unit);
 
         //if unit is not found, return early
-        if(!$unit){return MyResponse::make()->isNotFound()->json();}
+        if(!$unit){return ApiResponse::make()->isNotFound()->json();}
 
         $validator = Validator::make(request()->all(), $this->rule());
         if($validator->fails()){
-            return MyResponse::make()->data(request()->all())
+            return ApiResponse::make()->data(request()->all())
                 ->isNotValid($validator->errors())
                 ->json();
 
@@ -59,7 +59,7 @@ class UnitsController extends Controller
 
         $unit->update($validator->validated());
 
-        return MyResponse::make()->data($unit)->isUpdated()->json();
+        return ApiResponse::make()->data($unit)->isUpdated()->json();
 
     }
 
@@ -68,12 +68,18 @@ class UnitsController extends Controller
 
         //if unit is not found, return early
         if(!$unit){
-            return MyResponse::make()->isNotFound()->json();
+            return ApiResponse::make()->isNotFound()->json();
+        }
+
+        //if unit has one or more products, return early
+        if($unit->products->first()){
+            $message = 'Satuan tidak bisa dihapus karena ada produk yg terhubung dengan satuan ini';
+            return ApiResponse::make()->isNotAllowed($message)->json();
         }
 
         Unit::destroy($unit->id);
 
-        return MyResponse::make()->isDeleted()->json();
+        return ApiResponse::make()->isDeleted()->json();
     }
 
     private function rule(){

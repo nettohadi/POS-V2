@@ -1,7 +1,8 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Controllers;
 
+use App\Models\Product;
 use App\Models\Unit;
 use Database\Factories\UnitFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -278,5 +279,26 @@ class UnitsControllerTest extends TestCase
         $response = $this->delete(route('units.destroy',['unit'=> 99]));
 
         $response->assertStatus(404);
+    }
+
+    /** @test **/
+    public function a_unit_can_not_be_deleted_if_has_one_or_more_products()
+    {
+        $this->withoutExceptionHandling();
+
+        /* 1.Setup ----------------------------------------------------------*/
+        $unit = Unit::factory()->create()->toArray();
+        Product::factory()->count(1)->create(['unit_id' => $unit['id']]);
+
+        /* 2.Invoke ----------------------------------------------------------*/
+        $response = $this->delete(route('units.destroy',['unit'=> $unit['id']]));
+
+        /* 3.Assert ----------------------------------------------------------*/
+        /* 3.1 Response ----------------------------------------------------------*/
+        $response->assertStatus(400);
+
+        /* 3.2 Database ----------------------------------------------------------*/
+        $this->removeTimeStamp($unit);
+        $this->assertDatabaseHas($this->tableName, $unit);
     }
 }
