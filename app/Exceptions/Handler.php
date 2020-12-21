@@ -33,8 +33,16 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        $this->reportable(function (Throwable $e) {
-            //
+        $this->renderable(function (ApiValidationException $e, $request) {
+            return $e->render($request);
+        });
+
+        $this->renderable(function (ApiNotFoundException $e, $request){
+            return $e->render($request);
+        });
+
+        $this->renderable(function (ApiActionException $e, $request){
+            return $e->render($request);
         });
     }
 }

@@ -124,11 +124,15 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_not_be_found()
     {
-        $this->withoutExceptionHandling();
+        $this->expectNotFoundException();
+
+        /* Setup */
         $unit = Unit::factory()->create();
 
+        /* Invoke */
         $response = $this->get(route('units.show',['unit' => 100]));
 
+        /* Assert */
         $response->assertStatus(404);
         $this->assertNull($response->json('data'));
 
@@ -151,11 +155,16 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function name_is_required_during_insert(){
 
+        $this->expectValidationException();
+
+        /* Setup */
         $unit['name'] = null;
         $unit['desc'] = $this->faker->sentence(3);
 
+        /* Invoke */
         $response = $this->post(route('units.store'),$unit);
 
+        /* Assert */
         $response->assertStatus(400);
         $this->assertDatabaseMissing($this->tableName, $unit);
     }
@@ -163,11 +172,14 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function desc_is_not_required_during_insert(){
 
+        /* Setup */
         $unit['name'] = $this->faker->name;
         $unit['desc'] = null;
 
+        /* Invoke */
         $response = $this->post(route('units.store'),$unit);
 
+        /* Setup */
         $response->assertStatus(201);
         $this->assertDatabaseHas($this->tableName, $unit);
     }
@@ -199,18 +211,21 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_not_be_updated_if_does_not_exist()
     {
-        $this->withoutExceptionHandling();
+        $this->expectNotFoundException();
 
+        /* Setup */
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = 'New name';
         $unit['desc'] = 'New desc';
 
+        /* Invoke */
         $response = $this->put(route('units.update',
             ['unit' => 99]),
             $unit
         );
 
 
+        /* Assert */
         $response->assertStatus(404);
         $this->assertNull($response->json('data'));
     }
@@ -218,17 +233,20 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function name_is_required_during_update(){
 
-        $this->withoutExceptionHandling();
+        $this->expectValidationException();
 
+        /* Setup */
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = null;
         $unit['desc'] = 'New desc';
 
+        /* Invoke */
         $response = $this->put(route('units.update',
             ['unit' => $unit['id']]),
             $unit
         );
 
+        /* Assert */
         $response->assertStatus(400);
         $this->assertNotNull($response->json('errors')['name']);
         $this->assertDatabaseMissing($this->tableName, $unit);
@@ -272,19 +290,22 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_not_be_deleted_if_does_not_exist()
     {
-        $this->withoutExceptionHandling();
+        $this->expectNotFoundException();
 
+        /* Setup */
         $unit = Unit::factory()->create();
 
+        /* Invoke */
         $response = $this->delete(route('units.destroy',['unit'=> 99]));
 
+        /* Assert */
         $response->assertStatus(404);
     }
 
     /** @test **/
     public function a_unit_can_not_be_deleted_if_has_one_or_more_products()
     {
-        $this->withoutExceptionHandling();
+        $this->expectActionException();
 
         /* 1.Setup ----------------------------------------------------------*/
         $unit = Unit::factory()->create()->toArray();

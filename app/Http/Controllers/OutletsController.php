@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Libs\ApiResponse;
 use App\Models\Outlet;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use App\Http\Controllers\Base\BaseController;
 
-class OutletsController extends Controller
+class OutletsController extends BaseController
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index()
     {
@@ -24,7 +26,8 @@ class OutletsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ValidationException
      */
     public function store()
     {
@@ -56,7 +59,7 @@ class OutletsController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show($id)
     {
@@ -70,7 +73,7 @@ class OutletsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update()
     {
@@ -93,7 +96,7 @@ class OutletsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {

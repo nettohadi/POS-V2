@@ -2,44 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ApiNotFoundException;
+use App\Http\Controllers\Base\BaseController;
+use App\Http\Requests\ProductRequest;
 use App\Libs\ApiResponse;
 use App\Models\Product;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Resources\Product as ProductResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
-class ProductsController extends Controller
+class ProductsController extends BaseController
 {
     /**
      * Return filterable paginated list of product.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index()
     {
-        $perPage = request()->get('perPage');
-        $name = request()->get('name');
+        $perPage = request()->query('perPage');
+        $name = request()->query('name');
         return ApiResponse::make()->paginator(Product::filterByName($name)->paginate($perPage))->json();
     }
 
     /**
      * Store a newly created product in database.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Validation\ValidationException
+     * @param ProductRequest $request
+     * @return JsonResponse
      */
-    public function store()
+    public function store(ProductRequest $request)
     {
-        $validator = Validator::make(request()->all(),$this->rule());
-
-        if($validator->fails()){
-            return ApiResponse::make()->isNotValid($validator->errors())->json();
-        }
-
         //get validated product
-        $data = $validator->validated();
+        $data = $request->validated();
 
         //upload & set image path on data if image exist
         $this->uploadIfImageExists($data);
@@ -51,36 +44,26 @@ class ProductsController extends Controller
      * Return the specified product.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ApiNotFoundException
      */
     public function show($id)
     {
-        $product = Product::find($id);
-        return $product ? ApiResponse::make()->data($product)->json()
-                        : ApiResponse::make()->isNotFound()->json();
+        return ApiResponse::make()->data(Product::tryToFind($id))->json();
     }
 
     /**
      * Update the specified product
-     * @return \Illuminate\Http\JsonResponse
+     * @param ProductRequest $request
+     * @return JsonResponse
+     * @throws ApiNotFoundException
      */
-    public function update()
+    public function update(ProductRequest $request)
     {
-        //if product is not found
-        if(! $product = Product::find(request('product'))){
-            //Return early
-            return ApiResponse::make()->isNotFound()->json();
-        }
-
-        $validator = Validator::make(request()->all(), $this->rule());
-        if($validator->fails()){
-            return ApiResponse::make()->data(request()->all())
-                ->isNotValid($validator->errors())
-                ->json();
-        }
+        $product = Product::tryToFind(request('product'));
 
         //get validated product data
-        $data = $validator->validated();
+        $data = $request->validated();
 
         //upload & set image path on product if image exist
         $this->uploadIfImageExists($data);
@@ -93,37 +76,18 @@ class ProductsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $product
-     * @return \Illuminate\Http\JsonResponse
+     * @throws ApiNotFoundException
+     * @return JsonResponse
      */
     public function destroy()
     {
-        $product = Product::find(request('product'));
-
-        if(!$product) return ApiResponse::make()->isNotFound()->json();
+        $product = Product::tryToFind(request('product'));
 
         $product->delete();
 
         return ApiResponse::make()->isDeleted()->json();
     }
 
-    private function rule(){
-        return  [
-            'id' => 'required',
-            'barcode' => '',
-            'name' => 'required',
-            'name_initial' => '',
-            'unit_id' => 'required|numeric|exists:units,id',
-            'category_id' => 'required|numeric|exists:categories,id',
-            'stock_type' => 'required|string|in:single,composite',
-            'primary_ingredient_id' => '',
-            'primary_ingredient_qty' => '',
-            'for_sale' => 'required|boolean',
-            'image' => 'nullable|image',
-            'minimum_qty' => '',
-            'minimum_expiration_days' => ''
-        ];
-    }
 
     private function uploadIfImageExists(array &$data)
     {

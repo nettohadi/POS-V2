@@ -2,6 +2,9 @@
 
 namespace Tests;
 
+use App\Exceptions\ApiActionException;
+use App\Exceptions\ApiNotFoundException;
+use App\Exceptions\ApiValidationException;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -16,5 +19,20 @@ abstract class TestCase extends BaseTestCase
     }
     function removeTimeStamp(array &$array){
         $this->removeColumn($array,['created_at','updated_at']);
+    }
+    function expectNotFoundException()
+    {
+        $this->withoutExceptionHandling();
+        $this->expectException(ApiNotFoundException::class);
+    }
+    function expectValidationException()
+    {
+        $this->withoutExceptionHandling();
+        $this->expectException(ApiValidationException::class);
+    }
+    function expectActionException()
+    {
+        $this->withoutExceptionHandling();
+        $this->expectException(ApiActionException::class);
     }
 }

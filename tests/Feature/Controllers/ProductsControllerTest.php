@@ -126,11 +126,14 @@ class ProductsControllerTest extends TestCase
     /** @test **/
     public function a_product_can_not_be_found()
     {
-        $this->withoutExceptionHandling();
+        $this->expectNotFoundException();
+        /* Setup */
         $product = Product::factory()->create();
 
+        /* Invoke */
         $response = $this->get(route('products.show',['product' => 'random_id']));
 
+        /* Assert */
         $response->assertStatus(404);
         $this->assertNull($response->json('data'));
     }
@@ -180,7 +183,8 @@ class ProductsControllerTest extends TestCase
         //create a fake storage
         Storage::fake('public');
         //add fake image file
-        $data = $this->makeProduct(['image' => UploadedFile::fake()->image($this->fakeImageName)]);
+        $data = $this->makeProduct();
+        $data['image'] = UploadedFile::fake()->image($this->fakeImageName);
 
         /* 2. Invoke --------------------------------*/
         $timestamp = Carbon::now()->timestamp;
@@ -261,7 +265,7 @@ class ProductsControllerTest extends TestCase
      */
     public function a_product_can_not_be_updated($field, $value)
     {
-        $this->withoutExceptionHandling();
+        $this->expectValidationException();
 
         /* 1. Setup --------------------------------*/
         $initialImage = $this->fakeImagePath.$this->fakeImageName;
@@ -329,7 +333,7 @@ class ProductsControllerTest extends TestCase
     /** @test **/
     public function a_product_can_not_be_updated_if_does_not_exist()
     {
-        $this->withoutExceptionHandling();
+        $this->expectNotFoundException();
 
         /* 1. Setup --------------------------------*/
         $product = $this->makeProduct();
@@ -369,6 +373,7 @@ class ProductsControllerTest extends TestCase
     /** @test */
     public function a_product_can_not_be_deleted_if_does_not_exist()
     {
+        $this->expectNotFoundException();
         /* 1. Setup --------------------------------*/
         $product = Product::factory()->create()->toArray();
         $this->removeTimeStamp($product);
@@ -410,21 +415,14 @@ class ProductsControllerTest extends TestCase
         //create Category in DB
         $categoryFromDB = Category::factory()->create();
 
-        return [
-            'id' => $this->faker->unique()->word(),
-            'barcode' => $this->faker->unique()->word(),
-            'name' => $this->faker->name,
-            'name_initial' => 'AT',
-            'unit_id' => $unitFromDB->id,
-            'category_id' => $categoryFromDB->id,
-            'stock_type' => $this->faker->randomElement(['single','composite']),
-            'primary_ingredient_id' => $this->faker->unique()->word(),
-            'primary_ingredient_qty' => $this->faker->randomNumber(),
-            'for_sale' => (rand(0,1) == 1),
-            'image' => UploadedFile::fake()->image($this->fakeImageName),
-            'minimum_qty' => 0,
-            'minimum_expiration_days' => 0
-        ];
+        $product = Product::factory()->make([
+            'unit_id'     => $unitFromDB->id,
+            'category_id' => $categoryFromDB->id
+            ])->toArray();
+
+        $this->removeTimeStamp($product);
+
+        return $product;
     }
     public function invalidProduct()
     {
@@ -432,10 +430,10 @@ class ProductsControllerTest extends TestCase
             'Name is required'                       => ['name',null],
             'Unit id is required'                    => ['unit_id',null],
             'Unit id must be numeric'                => ['unit_id','string'],
-            'Unit id must exist in db'               => ['unit_id',3],
+            'Unit id must exist in db'               => ['unit_id','random_id'],
             'Category is required'                   => ['category_id',null],
             'Category id must be numeric'            => ['category_id','string'],
-            'Category id must exist in db'           => ['category_id',3],
+            'Category id must exist in db'           => ['category_id','random_id'],
             'Stock Type is required'                 => ['stock_type',null],
             'Stock Type must be string'              => ['stock_type',1],
             'Stock Type must be single or composite' => ['stock_type','double'],

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Exceptions\ApiNotFoundException;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Type;
@@ -102,6 +103,23 @@ class CategoriesControllerTest extends TestCase
     }
 
     /** @test **/
+    public function a_category_can_not_be_found()
+    {
+        $this->expectNotFoundException();
+
+        /* 1. Setup --------------------------------*/
+        Type::factory()->count(6)->create();
+        Category::factory()->create()->load('type');
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->get(route('categories.show',['category' => 'random_id']));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(404);
+
+    }
+
+    /** @test **/
     public function categories_can_be_filtered_by_name()
     {
         /* 1. Setup ------------------------------ */
@@ -157,7 +175,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function name_is_required_during_insert()
     {
-        $this->withoutExceptionHandling();
+        $this->expectValidationException();
 
         /* 1. Setup --------------------------------*/
         $category = $this->makeCategory();
@@ -214,7 +232,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_is_required_during_insert()
     {
-        $this->withoutExceptionHandling();
+        $this->expectValidationException();
 
         /* 1. Setup --------------------------------*/
         $category = $this->makeCategory();
@@ -243,7 +261,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_must_exist_in_database_during_insert()
     {
-        $this->withoutExceptionHandling();
+        $this->expectValidationException();
 
         /* 1. Setup --------------------------------*/
         $category = $this->makeCategory();
@@ -306,7 +324,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_not_be_updated_if_does_not_exist()
     {
-        $this->withoutExceptionHandling();
+        $this->expectNotFoundException();
 
         /** Setup */
         Type::factory()->create();
@@ -328,7 +346,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function name_is_required_during_update()
     {
-        $this->withoutExceptionHandling();
+        $this->expectValidationException();
 
         $type = Type::factory()->create();
         $category = Category::create([
@@ -361,7 +379,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_is_required_during_update()
     {
-        $this->withoutExceptionHandling();
+        $this->expectValidationException();
 
         $type = Type::factory()->create();
         $category = Category::create([
@@ -393,7 +411,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_must_exist_in_database_during_update()
     {
-        $this->withoutExceptionHandling();
+        $this->expectValidationException();
 
         $type = Type::factory()->create();
         $category = Category::create([
@@ -477,7 +495,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_not_be_deleted_if_does_not_exist()
     {
-        $this->withoutExceptionHandling();
+        $this->expectNotFoundException();
 
         /* Setup -----------------------------------------------*/
         $category = Category::factory()->create();
@@ -494,7 +512,7 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_not_be_deleted_if_has_one_or_more_products()
     {
-        $this->withoutExceptionHandling();
+        $this->expectActionException();
 
         /* 1.Setup ----------------------------------------------------------*/
         $category = Category::factory()->create()->toArray();
@@ -529,9 +547,7 @@ class CategoriesControllerTest extends TestCase
         return $category;
     }
 
-    private function assert_name_is_required($routeName){
 
-    }
 
 
 
