@@ -37,10 +37,10 @@ class Category extends BaseModel
         //if category has one or more products, throw exception
         if($model->products->first()){
 
-            $message = 'Kategori tidak bisa dihapus karena ada
-                produk yg terhubung dengan kategori ini';
+            $params['parent'] = __('validation.attributes.category');
+            $params['child'] = __('validation.attributes.product');;
 
-            throw new ApiActionException($message);
+            throw new ApiActionException(__('blockedAction.deletion',$params));
         }
     }
 }

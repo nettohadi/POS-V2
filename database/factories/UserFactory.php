@@ -28,10 +28,10 @@ class UserFactory extends Factory
             'name' => $this->faker->name,
             'sex' => Arr::random([1,0]),
             'email' => $this->faker->unique()->safeEmail,
-            'role' => $this->faker->numberBetween(1,10),
-            'shift_id' => $this->faker->numberBetween(1,10),
+            'role' => $this->faker->numberBetween(1,3),
+            'shift_id' => $this->faker->numberBetween(1,3),
+            'outlet_id' => (string)$this->faker->lexify('???'),
             'image' => null,
-            'email_verified_at' => now(),
             'password' => Hash::make('12345678')
         ];
     }

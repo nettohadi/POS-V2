@@ -23,6 +23,7 @@ class CreateUsersTable extends Migration
             $table->integer('role');
             $table->string('image')->nullable();
             $table->integer('shift_id')->nullable();
+            $table->string('outlet_id',5);
             $table->timestamps();
         });
     }

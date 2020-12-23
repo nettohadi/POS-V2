@@ -31,13 +31,7 @@ class ProductsController extends BaseController
      */
     public function store(ProductRequest $request)
     {
-        //get validated product
-        $data = $request->validated();
-
-        //upload & set image path on data if image exist
-        $this->uploadIfImageExists($data);
-
-        return ApiResponse::make()->data(Product::create($data))->isCreated()->json();
+        return ApiResponse::make()->isCreated(Product::uploadImageAndCreate($request->validated()))->json();
     }
 
     /**
@@ -61,16 +55,8 @@ class ProductsController extends BaseController
     public function update(ProductRequest $request)
     {
         $product = Product::tryToFind(request('product'));
-
-        //get validated product data
-        $data = $request->validated();
-
-        //upload & set image path on product if image exist
-        $this->uploadIfImageExists($data);
-
-        $product->update($data);
-
-        return ApiResponse::make()->data($product)->isUpdated()->json();
+        $product->uploadImageAndUpdate($request->validated());
+        return ApiResponse::make()->isUpdated($product)->json();
     }
 
     /**
@@ -88,21 +74,4 @@ class ProductsController extends BaseController
         return ApiResponse::make()->isDeleted()->json();
     }
 
-
-    private function uploadIfImageExists(array &$data)
-    {
-        if(!$data) return;
-
-        if((request()->file('image'))){
-            $imageFile = request()->file('image');
-            $path = "/products";
-            $newFileName = Product::generateImageName('product',$imageFile->getClientOriginalExtension());
-
-            $isUploaded = Storage::disk('public')->putFileAs($path, $imageFile, $newFileName);
-            $data['image'] = $isUploaded ? $path.'/'.$newFileName : null;
-        }else{
-            //if image is nul, remove image
-            unset($data['image']);
-        }
-    }
 }

@@ -15,8 +15,6 @@ class OutletsControllerTest extends TestCase
     /** @test **/
     public function outlets_can_be_retrieved()
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         $outlets = Outlet::factory()->count(7)->create();
 
@@ -53,8 +51,6 @@ class OutletsControllerTest extends TestCase
     /** @test **/
     public function outlets_can_be_filtered_by_name()
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup ------------------------------ */
 
         $expectedOUtlets = [];
@@ -84,7 +80,7 @@ class OutletsControllerTest extends TestCase
     {
         /* 1. Setup ------------------------------ */
 
-        //Create two Outlets which has the word 'Ayam'
+        //Create two Outlets which has the word 'Jogja'
 
         Outlet::factory()->create([
             'name' => 'Outlet Jogja Barat'
@@ -109,7 +105,6 @@ class OutletsControllerTest extends TestCase
     /** @test **/
     public function an_outlet_can_be_found()
     {
-        $this->withoutExceptionHandling();
 
         /*Setup ---------------------------------*/
         $outlet = Outlet::factory()->create();
@@ -126,8 +121,6 @@ class OutletsControllerTest extends TestCase
     /** @test **/
     public function an_outlet_can_not_be_found()
     {
-        $this->withoutExceptionHandling();
-
         /*Setup ---------------------------------*/
         $outlet = Outlet::factory()->create();
 
@@ -147,8 +140,6 @@ class OutletsControllerTest extends TestCase
      */
     public function an_outlet_can_be_inserted($field, $value)
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup ------------------------------ */
         $outlet = $this->makeOutlet();
         $outlet[$field] = $value;
@@ -182,8 +173,6 @@ class OutletsControllerTest extends TestCase
      */
     public function an_outlet_can_not_be_inserted($field, $value)
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup ------------------------------ */
         $outlet = $this->makeOutlet();
         $outlet[$field] = $value;
@@ -212,8 +201,6 @@ class OutletsControllerTest extends TestCase
      */
     public function an_outlet_can_be_updated($field, $value)
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup ------------------------------ */
         $outlet = $this->getOutletFromDB();
         //edit outlet
@@ -251,8 +238,6 @@ class OutletsControllerTest extends TestCase
      */
     public function an_outlet_can_not_be_updated($field, $value)
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup ------------------------------ */
         $outlet = $this->getOutletFromDB();
         //reserve id for update
@@ -278,8 +263,6 @@ class OutletsControllerTest extends TestCase
     /** @test **/
     public function a_outlet_can_not_be_updated_if_does_not_exist()
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         $outlet = $this->makeOutlet();
 

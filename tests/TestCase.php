@@ -20,6 +20,10 @@ abstract class TestCase extends BaseTestCase
     function removeTimeStamp(array &$array){
         $this->removeColumn($array,['created_at','updated_at']);
     }
+    function removeTimeStampAndImage(array &$array, String $imageColumnName='image'){
+        $this->removeTimeStamp($array);
+        $this->removeColumn($array, [$imageColumnName]);
+    }
     function expectNotFoundException()
     {
         $this->withoutExceptionHandling();

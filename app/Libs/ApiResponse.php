@@ -5,6 +5,7 @@ namespace App\Libs;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
@@ -50,7 +51,7 @@ class ApiResponse
      * Add data to be returned in json response
      * set http status to 200
      *
-     * @param  string|array  $data
+     * @param  string|array|Collection  $data
      * @return $this
      */
     public function data($data){
@@ -107,31 +108,33 @@ class ApiResponse
 
     /**
      * Set http response to 201 (created)
-     *
+     * @param  string|array|Collection  $data
      * @return $this
      */
-    public function isCreated(){
+    public function isCreated($data=null){
         $this->message = 'Berhasil menambahkan data baru';
         $this->appCode = '00';
+        $data ? $this->data = $data : $this->data;
         $this->httpStatus = 201;
         return $this;
     }
 
     /**
      * Set http response to 200 (created)
-     *
+     * @param  string|array|Collection  $data
      * @return $this
      */
-    public function isUpdated(){
+    public function isUpdated($data=null){
         $this->message = 'Berhasil memperbaharui data';
         $this->appCode = '00';
         $this->httpStatus = 200;
+        $data ? $this->data = $data : $this->data;
         return $this;
     }
 
     /**
      * Set http response to 400 (bad request)
-     *
+     * @param String $message
      * @return $this
      */
     public function isNotAllowed($message=null){
@@ -167,7 +170,7 @@ class ApiResponse
     /**
      * Create a new JSON response instance.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function json(){
         $response = [

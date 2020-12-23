@@ -111,7 +111,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_be_found()
     {
-        $this->withoutExceptionHandling();
         $unit = Unit::factory()->create();
 
         $response = $this->get(route('units.show',['unit' => $unit->id]));
@@ -124,7 +123,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_not_be_found()
     {
-        $this->expectNotFoundException();
 
         /* Setup */
         $unit = Unit::factory()->create();
@@ -141,7 +139,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_be_inserted()
     {
-        $this->withoutExceptionHandling();
 
         $unit['name'] = $this->faker->name;
         $unit['desc'] = $this->faker->sentence(3);
@@ -153,9 +150,8 @@ class UnitsControllerTest extends TestCase
     }
 
     /** @test **/
-    public function name_is_required_during_insert(){
-
-        $this->expectValidationException();
+    public function name_is_required_during_insert()
+    {
 
         /* Setup */
         $unit['name'] = null;
@@ -187,7 +183,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_be_updated()
     {
-        $this->withoutExceptionHandling();
 
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = 'New name';
@@ -211,7 +206,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_not_be_updated_if_does_not_exist()
     {
-        $this->expectNotFoundException();
 
         /* Setup */
         $unit['id'] = Unit::factory()->create()->id;
@@ -233,8 +227,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function name_is_required_during_update(){
 
-        $this->expectValidationException();
-
         /* Setup */
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = null;
@@ -255,7 +247,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function desc_is_not_required_during_update(){
 
-        $this->withoutExceptionHandling();
 
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = 'New name';
@@ -290,8 +281,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_not_be_deleted_if_does_not_exist()
     {
-        $this->expectNotFoundException();
-
         /* Setup */
         $unit = Unit::factory()->create();
 
@@ -305,8 +294,6 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_not_be_deleted_if_has_one_or_more_products()
     {
-        $this->expectActionException();
-
         /* 1.Setup ----------------------------------------------------------*/
         $unit = Unit::factory()->create()->toArray();
         Product::factory()->count(1)->create(['unit_id' => $unit['id']]);
@@ -321,5 +308,7 @@ class UnitsControllerTest extends TestCase
         /* 3.2 Database ----------------------------------------------------------*/
         $this->removeTimeStamp($unit);
         $this->assertDatabaseHas($this->tableName, $unit);
+        /* 3.3 Exception ---------------------------------------------------------*/
+
     }
 }

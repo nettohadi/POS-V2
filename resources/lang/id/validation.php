@@ -150,7 +150,10 @@ return [
     'attributes' => [
         'name'=>'nama',
         'desc'=>'Keterangan',
-        'type_id' => 'Kode Jenis'
+        'type_id' => 'Kode Jenis',
+        'unit' => 'Satuan',
+        'category' => 'Kategori',
+        'product' => 'Produk'
     ],
 
 ];

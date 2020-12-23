@@ -147,6 +147,13 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'name'=>'name',
+        'desc'=>'Description',
+        'type_id' => 'Type Id',
+        'unit' => 'Unit',
+        'category' => 'Category',
+        'product' => 'Product'
+    ],
 
 ];

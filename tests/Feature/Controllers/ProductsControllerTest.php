@@ -24,8 +24,6 @@ class ProductsControllerTest extends TestCase
     /** @test **/
     public function products_can_be_retrieved()
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         $products = Product::factory()->count(3)->create();
 
@@ -109,8 +107,6 @@ class ProductsControllerTest extends TestCase
     /** @test **/
     public function a_product_can_be_found()
     {
-        $this->withoutExceptionHandling();
-
         /*Setup ---------------------------------*/
         $product = Product::factory()->create();
 
@@ -126,7 +122,6 @@ class ProductsControllerTest extends TestCase
     /** @test **/
     public function a_product_can_not_be_found()
     {
-        $this->expectNotFoundException();
         /* Setup */
         $product = Product::factory()->create();
 
@@ -143,10 +138,8 @@ class ProductsControllerTest extends TestCase
      * @dataProvider validProduct
      *
      */
-    public function a_product_can_be_inserted($field, $value)
+    public function a_product_can_be_created($field, $value)
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup ------------------------------ */
         $product = $this->makeProduct();
         $product[$field] = $value;
@@ -175,26 +168,22 @@ class ProductsControllerTest extends TestCase
     }
 
     /** @test **/
-    public function a_product_image_can_be_uploaded_during_insert()
+    public function a_product_image_can_be_uploaded_during_creation()
     {
         $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         //create a fake storage
         Storage::fake('public');
-        //add fake image file
         $data = $this->makeProduct();
+        //add fake image file
         $data['image'] = UploadedFile::fake()->image($this->fakeImageName);
 
         /* 2. Invoke --------------------------------*/
-        $timestamp = Carbon::now()->timestamp;
         $response = $this->post(route('products.store'),$data);
 
         /* 3. Assert --------------------------------*/
         $response->assertStatus(201);
         $savedProduct = $response->json('data');
-
-        $this->assertStringContainsString("product_{$timestamp}", $savedProduct['image']);
 
         // Assert the file was stored
         Storage::disk('public')->assertExists($savedProduct['image']);
@@ -204,7 +193,7 @@ class ProductsControllerTest extends TestCase
      * @test *
      * @dataProvider invalidProduct
      */
-    public function a_product_can_not_be_inserted($field, $value)
+    public function a_product_can_not_be_created($field, $value)
     {
         /* 1. Setup --------------------------------*/
         $product = $this->makeProduct();
@@ -230,7 +219,6 @@ class ProductsControllerTest extends TestCase
     public function a_product_can_be_updated($field, $value)
     {
         $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         $initialImage = UploadedFile::fake()->image($this->fakeImageName);
         $product = $this->getProductFromDB(['image' => $initialImage]);
@@ -245,12 +233,10 @@ class ProductsControllerTest extends TestCase
         $response->assertStatus(200);
 
         $data = $response->json('data');
-        $this->removeTimeStamp($data);
-        $this->removeTimeStamp($product);
 
-        //remove image because we can not compare them-------
-        $this->removeColumn($data,['image']);
-        $this->removeColumn($product,['image']);
+        //remove image $ timestamp because we can not compare them-------
+        $this->removeTimeStampAndImage($data);
+        $this->removeTimeStampAndImage($product);
         //---------------------------------------------------
 
         $this->assertEquals($product, $data);
@@ -265,8 +251,6 @@ class ProductsControllerTest extends TestCase
      */
     public function a_product_can_not_be_updated($field, $value)
     {
-        $this->expectValidationException();
-
         /* 1. Setup --------------------------------*/
         $initialImage = $this->fakeImagePath.$this->fakeImageName;
         $product = $this->getProductFromDB(['image' => $initialImage]);
@@ -313,8 +297,6 @@ class ProductsControllerTest extends TestCase
     /** @test **/
     public function a_product_image_should_not_change_if_no_image_is_uploaded_during_update()
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         $initialImage = $this->fakeImagePath.$this->fakeImageName;
         $product = $this->getProductFromDB(['image' => $initialImage]);
@@ -333,7 +315,6 @@ class ProductsControllerTest extends TestCase
     /** @test **/
     public function a_product_can_not_be_updated_if_does_not_exist()
     {
-        $this->expectNotFoundException();
 
         /* 1. Setup --------------------------------*/
         $product = $this->makeProduct();
@@ -373,7 +354,6 @@ class ProductsControllerTest extends TestCase
     /** @test */
     public function a_product_can_not_be_deleted_if_does_not_exist()
     {
-        $this->expectNotFoundException();
         /* 1. Setup --------------------------------*/
         $product = Product::factory()->create()->toArray();
         $this->removeTimeStamp($product);

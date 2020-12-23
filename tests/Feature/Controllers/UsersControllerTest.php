@@ -2,14 +2,21 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Models\Outlet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class UsersControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
+
+    private $tableName = 'users';
+    private $fakeImageName = 'user.jpg';
 
    /** @test **/
    public function users_can_be_retrieved()
@@ -122,11 +129,225 @@ class UsersControllerTest extends TestCase
         $this->assertNull($response->json('data'));
     }
 
+    /**
+     * @test *
+     * @dataProvider validUser
+     *
+     */
+    public function a_user_can_be_created($field, $value)
+    {
+        /* 1. Setup ------------------------------ */
+        $user = $this->makeUser();
+        $user[$field] = $value;
+        /* 2. Invoke ------------------------------ */
+        $response = $this->post(route('users.store'),$user);
+
+        /* 3. Assert --------------------------------*/
+        /* 3.1 Response --------------------------------*/
+        $response->assertStatus(201);
+
+
+        $data = $response->json('data');
+
+        $this->removeColumn($data,['created_at','updated_at','id']);
+        $this->removeColumn($user, ['image','password','password_confirm']);
+        $this->assertEquals($user, $data);
+
+        /* 3.2 Database --------------------------------*/
+        $this->assertDatabaseHas($this->tableName, $user);
+    }
+
+    /**
+     * @test *
+     * @dataProvider invalidInsertUser
+     *
+     */
+    public function a_user_can_not_be_created($field, $value)
+    {
+        /* 1. Setup ------------------------------ */
+        $user = $this->makeUser();
+        $user[$field] = $value;
+
+        /* 2. Invoke ------------------------------ */
+        $response = $this->post(route('users.store'),$user);
+
+        /* 3. Assert --------------------------------*/
+        /* 3.1 Response --------------------------------*/
+        $response->assertStatus(400);
+
+        /* 3.2 Database --------------------------------*/
+        $this->removeColumn($user, ['image','password','password_confirm']);
+        $this->assertDatabaseMissing($this->tableName, $user);
+    }
+
+    /** @test **/
+    public function a_user_image_can_be_uploaded_during_creation()
+    {
+        $this->withoutExceptionHandling();
+        /* 1. Setup --------------------------------*/
+        //create a fake storage
+        Storage::fake('public');
+        $data = $this->makeUser();
+        //add fake image file
+        $data['image'] = UploadedFile::fake()->image($this->fakeImageName);
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->post(route('users.store'),$data);
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(201);
+        $savedUser = $response->json('data');
+
+        // Assert the file was stored
+        Storage::disk('public')->assertExists($savedUser['image']);
+    }
+
+    /**
+     * @test *
+     * @dataProvider validUser
+     */
+    public function a_user_can_be_updated($field, $value)
+    {
+        /* 1. Setup --------------------------------*/
+        $user = $this->getUserFromDB();
+        //edit data
+        $user[$field] = $value;
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->put(route('users.update',['user' => $user['id']]),$user);
+
+        /* 3. Assert --------------------------------*/
+        /* 3.1 Response --------------------------------*/
+        $response->assertStatus(200);
+
+        $data = $response->json('data');
+
+        //remove image & timestamp because we can not compare them-------
+        $this->removeTimeStampAndImage($data);
+        $this->removeTimeStampAndImage($user);
+        //---------------------------------------------------
+
+        $this->assertEquals($user, $data);
+
+        /* 3.2 Database --------------------------------*/
+        $this->assertDatabaseHas($this->tableName,$data);
+    }
+
+    /**
+     * @test *
+     * @dataProvider invalidUser
+     */
+    public function a_user_can_not_be_updated($field, $value)
+    {
+        /* 1. Setup --------------------------------*/
+        $user = $this->getUserFromDB();
+        //edit data
+        $user[$field] = $value;
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->put(route('users.update',['user' => $user['id']]),$user);
+
+        /* 3. Assert --------------------------------*/
+        /* 3.1 Response --------------------------------*/
+        $response->assertStatus(400);
+
+        /* 3.2 Database --------------------------------*/
+        $this->assertDatabaseMissing($this->tableName,$user);
+    }
+
+    /** @test **/
+    public function a_user_image_can_be_uploaded_during_update()
+    {
+        $this->withoutExceptionHandling();
+        /* 1. Setup --------------------------------*/
+        //create a fake storage
+        Storage::fake('public');
+        $user = $this->makeUser();
+        //add fake image file
+        $user['image'] = UploadedFile::fake()->image($this->fakeImageName);
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->post(route('users.store'),$user);
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(201);
+        $data = $response->json('data');
+
+        // assert database
+        $this->removeTimeStamp($data);
+        $this->assertDatabaseHas($this->tableName, $data);
+
+        // Assert the file was stored
+        Storage::disk('public')->assertExists($data['image']);
+    }
+
+    /** @test **/
+    public function a_user_can_be_deleted()
+    {
+        /* 1. Setup --------------------------------*/
+        $user = User::factory()->create()->toArray();
+        $this->removeTimeStamp($user);
+
+        //Just to make sure it exists in database
+        $this->assertDatabaseHas($this->tableName,$user);
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->delete(route('users.destroy',['user' => $user['id']]));
+
+        /* 3. Assert --------------------------------*/
+        /* 3.1 Response --------------------------------*/
+        $response->assertStatus(200);
+
+        /* 3.2 Database --------------------------------*/
+        $this->assertDatabaseMissing($this->tableName, $user);
+    }
+
+    /** @test */
+    public function a_user_can_not_be_deleted_if_does_not_exist()
+    {
+        /* 1. Setup --------------------------------*/
+        $user = User::factory()->create()->toArray();
+        $this->removeTimeStamp($user);
+
+        //Just to make sure it exists in database
+        $this->assertDatabaseHas($this->tableName,$user);
+
+        /* 2. Invoke --------------------------------*/
+        // we pass  id of user we did not create
+        $response = $this->delete(route('users.destroy',['user' => 'no_id']));
+
+        /* 3. Assert --------------------------------*/
+        /* 3.1 Response --------------------------------*/
+        $response->assertStatus(404);
+
+        /* 3.2 Database --------------------------------*/
+        $this->assertDatabaseMissing($this->tableName, ['id' => 'no_id']);
+        //Just to make sure it exists in database
+        $this->assertDatabaseHas($this->tableName,$user);
+    }
+
     private function getUserFromDB(array $values=[]){
+        $outlet = Outlet::factory()->create();
+        $values['outlet_id'] = $outlet->id;
+
         //create user in DB & return it
         return User::factory()->create($values)->toArray();
     }
-
+    private function makeUser()
+    {
+        $outlet = Outlet::factory()->create();
+        $user = User::factory()->make(['outlet_id' => $outlet->id])->toArray();
+        $user['password'] = Hash::make('12345678');
+        $user['password_confirm'] = Hash::make('12345678');
+        return $user;
+    }
+    public function validUser()
+    {
+        return [
+            'Image is not required' => ['image',null],
+            'Shift Id not required' => ['shift_id',null],
+        ];
+    }
     public function invalidUser()
     {
         return [
@@ -134,22 +355,15 @@ class UsersControllerTest extends TestCase
             'Sex  is required'                        => ['sex',null],
             'Email is required'                       => ['email',null],
             'Email must be valid'                     => ['email','email'],
-            'Password must be at least 6 characters'  => ['password','123'],
             'role is required'                        => ['role',null],
             'Image must be image file'                => ['image','not-image']
         ];
     }
-
-    public function validUser()
-    {
-        return [
-            'Barcode is not required'                 => ['barcode',null],
-            'Name Initial is not required'            => ['name_initial',null],
-            'Primary ingredient id is not required'   => ['primary_ingredient_id',null],
-            'Primary ingredient qty is not required'  => ['primary_ingredient_qty',null],
-            'Image is not required'                   => ['image',null],
-            'Minimum qty is not required'             => ['minimum_qty',null],
-            'Minimum expiration days is not required' => ['minimum_expiration_days',null],
-        ];
+    public function invalidInsertUser(){
+        return array_merge($this->invalidUser(), [
+            'Password is required'                    => ['password',null],
+            'Password Confirmation is required'       => ['password_confirm',null],
+            'Password must be at least 6 characters'  => ['password','123'],
+        ]);
     }
 }

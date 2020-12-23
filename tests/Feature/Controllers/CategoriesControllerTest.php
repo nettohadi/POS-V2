@@ -19,8 +19,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function categories_can_be_retrieved()
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         Type::factory()->count(6)->create();
         $categories = Category::factory()->count(7)->create()->load('type');
@@ -87,7 +85,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_be_found()
     {
-        $this->withoutExceptionHandling();
 
         /* 1. Setup --------------------------------*/
         Type::factory()->count(6)->create();
@@ -105,8 +102,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_not_be_found()
     {
-        $this->expectNotFoundException();
-
         /* 1. Setup --------------------------------*/
         Type::factory()->count(6)->create();
         Category::factory()->create()->load('type');
@@ -147,8 +142,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_be_inserted()
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         $category = $this->makeCategory();
 
@@ -175,8 +168,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function name_is_required_during_insert()
     {
-        $this->expectValidationException();
-
         /* 1. Setup --------------------------------*/
         $category = $this->makeCategory();
         $category['name'] = '';
@@ -203,8 +194,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function desc_is_not_required_during_insert()
     {
-        $this->withoutExceptionHandling();
-
         /* 1. Setup --------------------------------*/
         $category = $this->makeCategory();
         $category['desc'] = null;
@@ -232,8 +221,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_is_required_during_insert()
     {
-        $this->expectValidationException();
-
         /* 1. Setup --------------------------------*/
         $category = $this->makeCategory();
         $category['type_id'] = null;
@@ -261,8 +248,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_must_exist_in_database_during_insert()
     {
-        $this->expectValidationException();
-
         /* 1. Setup --------------------------------*/
         $category = $this->makeCategory();
         $category['type_id'] = 'random_id';
@@ -291,8 +276,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_be_updated()
     {
-        $this->withoutExceptionHandling();
-
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -324,8 +307,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_not_be_updated_if_does_not_exist()
     {
-        $this->expectNotFoundException();
-
         /** Setup */
         Type::factory()->create();
         $category = Category::factory()->create(['type_id' => 1])->toArray();
@@ -346,8 +327,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function name_is_required_during_update()
     {
-        $this->expectValidationException();
-
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -379,8 +358,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_is_required_during_update()
     {
-        $this->expectValidationException();
-
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -411,8 +388,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_must_exist_in_database_during_update()
     {
-        $this->expectValidationException();
-
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -444,8 +419,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function desc_is_not_required_during_update()
     {
-        $this->withoutExceptionHandling();
-
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -478,8 +451,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_be_deleted()
     {
-        $this->withoutExceptionHandling();
-
         /* Setup -----------------------------------------------*/
         $category = Category::factory()->create();
 
@@ -495,8 +466,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_not_be_deleted_if_does_not_exist()
     {
-        $this->expectNotFoundException();
-
         /* Setup -----------------------------------------------*/
         $category = Category::factory()->create();
 
@@ -512,8 +481,6 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_not_be_deleted_if_has_one_or_more_products()
     {
-        $this->expectActionException();
-
         /* 1.Setup ----------------------------------------------------------*/
         $category = Category::factory()->create()->toArray();
         Product::factory()->count(1)->create(['category_id' => $category['id']]);

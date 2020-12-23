@@ -19,7 +19,7 @@ class Product extends BaseModel
      */
     protected static function booted()
     {
-        static::creating(function ($product){
+        self::creating(function ($product){
             $ucode = resolve('App\Models\UCode');
             $dateYearMonth = date('dym');
             $product->id = $product->id ?? $ucode->generate("{$dateYearMonth}");
@@ -35,10 +35,6 @@ class Product extends BaseModel
         return $value == 1 ? true : false;
     }
 
-    public static function generateImageName(string $keyword='',string $imageExtension='jpg'){
-        return $keyword.'_'.Carbon::now()->timestamp.Carbon::now()->microsecond.'.'.$imageExtension;
-    }
-
     //Relationship : Belongs to Unit
     public function unit(){
         return $this->belongsTo(Unit::class);
@@ -49,5 +45,9 @@ class Product extends BaseModel
         return $this->belongsTo(Category::class);
     }
 
+    protected static function uploadPath()
+    {
+        return '/products';
+    }
 
 }
