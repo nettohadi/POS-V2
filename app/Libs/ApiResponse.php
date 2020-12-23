@@ -147,12 +147,14 @@ class ApiResponse
     /**
      * Set http response to 200 (created)
      *
+     * @param  string|array|Collection  $data
      * @return $this
      */
-    public function isDeleted(){
+    public function isDeleted($data=null){
         $this->message = 'Berhasil menghapus data';
         $this->appCode = '00';
         $this->httpStatus = 200;
+        $data ? $this->data = $data : $this->data;
         return $this;
     }
 
