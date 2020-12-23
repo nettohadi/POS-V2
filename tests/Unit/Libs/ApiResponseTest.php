@@ -37,34 +37,24 @@ class ApiResponseTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-        $perPage  = 10;
-        $total    = 30;
+        /*Setup------------------------------------------------*/
+        $perPage  = 3;
+        $total    = 10;
         $lastPage = (int)(ceil($total / $perPage));
 
+        // make a paginator
+        $paginator = $this->makePaginator($perPage, $lastPage, $total);
+
+        //Create dummy data in database
         Dummy::factory()->count($total)->create();
-
-        $paginator = [
-            'links' => [
-                'first'=> 'http://api.dev/orders?page=1',
-                'last' => 'http://api.dev/orders?page='.$lastPage,
-                'prev' => 'http://api.dev/orders?page=1',
-                'next' => 'http://api.dev/orders?page=2'
-            ],
-            'meta' => [
-                'current_page'=> 1,
-                'last_page'   => $lastPage,
-                'path'        => 'http://api.dev/orders',
-                'per_page'    => $perPage,
-                'from'        => 1,
-                'to'          => 10,
-                'total'       => $total
-            ]
-        ];
-        $dummies = Dummy::paginate(10);
+        $dummies = Dummy::paginate($perPage);
         $dummies->setPath('http://api.dev/orders');
+        /*Setup------------------------------------------------*/
 
+        /*Invoke ------------------------------------------------*/
         $jsonResponse = ApiResponse::make()->paginator($dummies)->json();
 
+        /*Assert*/
         $this->assertEquals($paginator,$jsonResponse->getData(true)['paginator']);
 
     }
@@ -72,37 +62,46 @@ class ApiResponseTest extends TestCase
     /** @test **/
     public function errors_can_be_set()
     {
+        /*setup*/
         $errors = [
           'name' => 'can not be empty',
           'type' => 'should exist'
         ];
 
+        /*Invoke*/
         $response = ApiResponse::make()->errors($errors);
 
+        /*Assert*/
         $this->assertEquals($errors,$response->json()->getData(true)['errors']);
     }
 
     /** @test **/
     public function can_return_invalid_response()
     {
+        /*Setup*/
         $errors = [
             'name' => 'can not be empty',
             'type' => 'should exist'
         ];
 
+        /*Invoke*/
         $jsonResponse = ApiResponse::make()->isNotValid($errors)->json();
+
+        /*Assert*/
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(400,$jsonResponse->getStatusCode());
         $this->assertEquals($errors,$arrayResponse['errors']);
-
         $this->assertArrayHasKeys(['code','message','data','errors'], $arrayResponse);
     }
 
     /** @test **/
     public function can_return_notFound_response()
     {
+        /*Invoke*/
         $jsonResponse = ApiResponse::make()->isNotFound()->json();
+
+        /*Assert*/
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(404,$jsonResponse->getStatusCode());
@@ -110,35 +109,56 @@ class ApiResponseTest extends TestCase
         $this->assertArrayNotHasKey('errors', $arrayResponse);
     }
 
-    /** @test **/
-    public function can_return_isCreated_response()
+    /**
+     * @test
+     * @dataProvider validData
+     */
+    public function can_return_isCreated_response($data)
     {
-        $jsonResponse = ApiResponse::make()->isCreated()->json();
+        /*Invoke*/
+        $jsonResponse = ApiResponse::make()->isCreated($data)->json();
+
+        /*Assert*/
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(201,$jsonResponse->getStatusCode());
+        $this->assertEquals($data,$arrayResponse['data']);
         $this->assertArrayHasKeys(['code','message','data'], $arrayResponse);
         $this->assertArrayNotHasKey('errors', $arrayResponse);
     }
 
-    /** @test **/
-    public function can_return_isUpdated_response()
+    /**
+     * @test *
+     * @dataProvider validData
+     */
+    public function can_return_isUpdated_response($data)
     {
-        $jsonResponse = ApiResponse::make()->isUpdated()->json();
+        /* Invoke */
+        $jsonResponse = ApiResponse::make()->isUpdated($data)->json();
+
+        /* Assert */
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(200,$jsonResponse->getStatusCode());
+        $this->assertEquals($data, $arrayResponse['data']);
         $this->assertArrayHasKeys(['code','message','data'], $arrayResponse);
         $this->assertArrayNotHasKey('errors', $arrayResponse);
     }
 
-    /** @test **/
-    public function can_return_isDeleted_response()
+    /**
+     * @test *
+     * @dataProvider validData
+     */
+    public function can_return_isDeleted_response($data)
     {
-        $jsonResponse = ApiResponse::make()->isDeleted()->json();
+        /*Invoke*/
+        $jsonResponse = ApiResponse::make()->isDeleted($data)->json();
+
+        /*Assert*/
         $arrayResponse = $jsonResponse->getData(true);
 
         $this->assertEquals(200,$jsonResponse->getStatusCode());
+        $this->assertEquals($data, $arrayResponse['data']);
         $this->assertArrayHasKeys(['code','message','data'], $arrayResponse);
         $this->assertArrayNotHasKey('errors', $arrayResponse);
     }
@@ -153,5 +173,32 @@ class ApiResponseTest extends TestCase
         foreach ($keys as $item){
             $this->assertArrayNotHasKey($item, $array);
         }
+    }
+
+    public function validData(){
+        return [
+            "Data can be null" => [null],
+            "Data is not null" => ['prop' => 'test', 'prop2' => 'test2']
+        ];
+    }
+
+    private function makePaginator($perPage, $lastPage, $total){
+        return [
+            'links' => [
+                'first'=> 'http://api.dev/orders?page=1',
+                'last' => 'http://api.dev/orders?page='.$lastPage,
+                'prev' => 'http://api.dev/orders?page=1',
+                'next' => 'http://api.dev/orders?page=2'
+            ],
+            'meta' => [
+                'current_page'=> 1,
+                'last_page'   => $lastPage,
+                'path'        => 'http://api.dev/orders',
+                'per_page'    => $perPage,
+                'from'        => 1,
+                'to'          => $perPage,
+                'total'       => $total
+            ]
+        ];
     }
 }
