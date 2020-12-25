@@ -109,6 +109,36 @@ class ApiResponseTest extends TestCase
         $this->assertArrayNotHasKey('errors', $arrayResponse);
     }
 
+    /** @test **/
+    public function can_return_unauthenticated_response()
+    {
+        /*Invoke*/
+        $jsonResponse = ApiResponse::make()->isNotAuthenticated('Unauthenticated')->json();
+
+        /*Assert*/
+        $arrayResponse = $jsonResponse->getData(true);
+
+        $this->assertEquals(401,$jsonResponse->getStatusCode());
+        $this->assertArrayHasKeys(['code','message','data'], $arrayResponse);
+        $this->assertArrayNotHasKey('errors', $arrayResponse);
+        $this->assertEquals('Unauthenticated',$arrayResponse['message']);
+    }
+
+    /** @test **/
+    public function can_return_notAllowed_response()
+    {
+        /*Invoke*/
+        $jsonResponse = ApiResponse::make()->isNotAllowed('Not Allowed')->json();
+
+        /*Assert*/
+        $arrayResponse = $jsonResponse->getData(true);
+
+        $this->assertEquals(403,$jsonResponse->getStatusCode());
+        $this->assertArrayHasKeys(['code','message','data'], $arrayResponse);
+        $this->assertArrayNotHasKey('errors', $arrayResponse);
+        $this->assertEquals('Not Allowed',$arrayResponse['message']);
+    }
+
     /**
      * @test
      * @dataProvider validData

@@ -133,14 +133,26 @@ class ApiResponse
     }
 
     /**
-     * Set http response to 400 (bad request)
+     * Set http response to 403 (Forbidden)
      * @param String $message
      * @return $this
      */
     public function isNotAllowed($message=null){
         $this->message = $message ?? 'Permintaan anda ditolak';
         $this->appCode = '04';
-        $this->httpStatus = 400;
+        $this->httpStatus = 403;
+        return $this;
+    }
+
+    /**
+     * Set http response to 403 (Forbidden)
+     * @param String $message
+     * @return $this
+     */
+    public function isNotAuthenticated($message=null){
+        $this->message = $message ?? 'Permintaan anda ditolak';
+        $this->appCode = '05';
+        $this->httpStatus = 401;
         return $this;
     }
 

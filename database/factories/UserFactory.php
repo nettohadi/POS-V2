@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'email' => $this->faker->unique()->safeEmail,
             'role' => $this->faker->numberBetween(1,3),
             'shift_id' => $this->faker->numberBetween(1,3),
-            'outlet_id' => (string)$this->faker->lexify('???'),
+            'outlet_id' => $this->faker->lexify('???'),
             'image' => null,
             'password' => Hash::make('12345678')
         ];

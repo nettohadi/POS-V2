@@ -303,7 +303,7 @@ class UnitsControllerTest extends TestCase
 
         /* 3.Assert ----------------------------------------------------------*/
         /* 3.1 Response ----------------------------------------------------------*/
-        $response->assertStatus(400);
+        $response->assertStatus(403);
 
         /* 3.2 Database ----------------------------------------------------------*/
         $this->removeTimeStamp($unit);

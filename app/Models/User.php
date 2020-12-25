@@ -6,10 +6,11 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Base\BaseUser;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends BaseUser
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.

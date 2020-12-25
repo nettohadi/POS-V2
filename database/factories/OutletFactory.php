@@ -22,7 +22,7 @@ class OutletFactory extends Factory
     public function definition()
     {
         return [
-            'id' => (string)$this->faker->lexify('???'),
+            'id' => $this->faker->lexify('???'),
             'name' => $this->faker->name,
             'address' => $this->faker->address,
             'vat_percentage' => $this->faker->numberBetween(1,50),

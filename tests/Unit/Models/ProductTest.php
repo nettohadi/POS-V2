@@ -112,7 +112,7 @@ class ProductTest extends TestCase
         $microsecond = (string)Carbon::now()->microsecond;
 
         /* 2. Invoke --------------------------------*/
-        $uniqueName = Product::generateImageName($keyword,$imageExtension);
+        $uniqueName = Product::generateImageName($imageExtension,$keyword,);
 
         /* 3. Assert --------------------------------*/
         $this->assertStringContainsString('product_',$uniqueName);

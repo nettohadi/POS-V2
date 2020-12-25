@@ -29,6 +29,15 @@ class BaseModel extends Model
         return $model;
     }
 
+    public function scopeFirstOrThrow($query, $message=null)
+    {
+        $model = $query->first();
+
+        if(!$model) throw new ApiNotFoundException($message);
+
+        return $model;
+    }
+
     protected function getCreatedAtAttribute($value)
     {
         if(!$value) return null;

@@ -44,5 +44,9 @@ class Handler extends ExceptionHandler
         $this->renderable(function (ApiActionException $e, $request){
             return $e->render($request);
         });
+
+        $this->renderable(function (ApiAuthenticationException $e, $request){
+            return $e->render($request);
+        });
     }
 }
