@@ -59,4 +59,27 @@ class BaseUserTest extends TestCase
         /* 2. Invoke --------------------------------*/
         $user->checkPassword('random_password');
     }
+
+    /** @test **/
+    public function user_can_create_a_token()
+    {
+        /* 1. Setup --------------------------------*/
+        $password = '12345678';
+        $deviceName = 'Device Y';
+
+        $user = User::factory()->create(
+            ['password' => Hash::make($password)]
+        );
+
+        /* 2. Invoke --------------------------------*/
+        $token = $user->getToken($password,$deviceName);
+
+        /* 3. Assert --------------------------------*/
+        $this->assertNotNull($token);
+        $this->assertDatabaseHas('personal_access_tokens',[
+            'tokenable_type' => 'App\Models\User',
+            'tokenable_id' => $user->id,
+            'name' => 'Device Y'
+        ]);
+    }
 }

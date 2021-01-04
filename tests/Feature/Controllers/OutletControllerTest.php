@@ -2,20 +2,25 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Exceptions\ApiAuthorizationException;
 use App\Models\Outlet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class OutletsControllerTest extends TestCase
+class OutletControllerTest extends TestCase
 {
     use  RefreshDatabase, withFaker;
-    private $tableName = 'outlets';
+    public $tableName = 'outlets';
+    public $routeName = 'outlets';
+    public $paramName = 'outlet';
+
 
     /** @test **/
     public function outlets_can_be_retrieved()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $outlets = Outlet::factory()->count(7)->create();
 
         /* 2. Invoke --------------------------------*/
@@ -37,6 +42,7 @@ class OutletsControllerTest extends TestCase
     public function outlets_can_be_retrieved_using_pagination()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $outlets = Outlet::factory()->count(10)->create();
 
         /* 2. Invoke --------------------------------*/
@@ -52,6 +58,7 @@ class OutletsControllerTest extends TestCase
     public function outlets_can_be_filtered_by_name()
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
 
         $expectedOUtlets = [];
 
@@ -79,6 +86,7 @@ class OutletsControllerTest extends TestCase
     public function outlets_will_be_empty_if_names_does_not_match_the_keywords()
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
 
         //Create two Outlets which has the word 'Jogja'
 
@@ -107,6 +115,7 @@ class OutletsControllerTest extends TestCase
     {
 
         /*Setup ---------------------------------*/
+        $this->withAuthorization();
         $outlet = Outlet::factory()->create();
 
         /*Invoke ---------------------------------*/
@@ -122,6 +131,7 @@ class OutletsControllerTest extends TestCase
     public function an_outlet_can_not_be_found()
     {
         /*Setup ---------------------------------*/
+        $this->withAuthorization();
         $outlet = Outlet::factory()->create();
 
         /*Invoke ---------------------------------*/
@@ -141,10 +151,9 @@ class OutletsControllerTest extends TestCase
     public function an_outlet_can_be_inserted($field, $value)
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
         $outlet = $this->makeOutlet();
         $outlet[$field] = $value;
-        //add dummy column
-        $outlet['dummy'] = 'dummy';
 
         /* 2. Invoke ------------------------------ */
         $response = $this->post(route('outlets.store'),$outlet);
@@ -157,8 +166,6 @@ class OutletsControllerTest extends TestCase
 
         //remove timestamp
         $this->removeTimeStamp($data);
-        //remove dummy column
-        $this->removeColumn($outlet,['dummy']);
 
         $this->assertEquals($outlet, $data);
 
@@ -174,6 +181,7 @@ class OutletsControllerTest extends TestCase
     public function an_outlet_can_not_be_inserted($field, $value)
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
         $outlet = $this->makeOutlet();
         $outlet[$field] = $value;
 
@@ -202,6 +210,7 @@ class OutletsControllerTest extends TestCase
     public function an_outlet_can_be_updated($field, $value)
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
         $outlet = $this->getOutletFromDB();
         //edit outlet
         $outlet[$field] = $value;
@@ -239,6 +248,7 @@ class OutletsControllerTest extends TestCase
     public function an_outlet_can_not_be_updated($field, $value)
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
         $outlet = $this->getOutletFromDB();
         //reserve id for update
         $id = $outlet['id'];
@@ -261,9 +271,11 @@ class OutletsControllerTest extends TestCase
     }
 
     /** @test **/
-    public function a_outlet_can_not_be_updated_if_does_not_exist()
+    public function an_outlet_can_not_be_updated_if_does_not_exist()
+
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $outlet = $this->makeOutlet();
 
         /* 2. Invoke --------------------------------*/
@@ -280,9 +292,10 @@ class OutletsControllerTest extends TestCase
     }
 
     /** @test **/
-    public function a_outlet_can_be_deleted()
+    public function an_outlet_can_be_deleted()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $outlet = Outlet::factory()->create()->toArray();
         $this->removeTimeStamp($outlet);
 
@@ -301,9 +314,10 @@ class OutletsControllerTest extends TestCase
     }
 
     /** @test */
-    public function a_outlet_can_not_be_deleted_if_does_not_exist()
+    public function an_outlet_can_not_be_deleted_if_does_not_exist()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $outlet = Outlet::factory()->create()->toArray();
         $this->removeTimeStamp($outlet);
 
@@ -320,6 +334,50 @@ class OutletsControllerTest extends TestCase
 
         /* 3.2 Database --------------------------------*/
         $this->assertDatabaseMissing($this->tableName, ['id' => 'no_id']);
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     * @param $method*
+     * @param $routeName
+     * @param $param
+     */
+    public function outlet_can_not_be_accessed_if_unauthenticated($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(401);
+
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     */
+    public function outlet_can_not_be_accessed_if_unauthorized($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+        $this->withoutExceptionHandling();
+        $this->expectException(ApiAuthorizationException::class);
+
+        //Exclude particular route
+        $this->withAuthorizationExcept([$routeName]);
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(403);
+
+    }
+
+    public function routes(){
+        return $this->getRoutes();
     }
 
     private function getOutletFromDB(array $valuesToInclude=[]){

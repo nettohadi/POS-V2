@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class BaseModel extends Model
 {
-    protected static function tryToFind($id){
+    protected static function findOrThrow($id){
         $model = self::find($id);
 
         if(!$model){throw new ApiNotFoundException();}
@@ -19,7 +19,7 @@ class BaseModel extends Model
         return $model;
     }
 
-    public function scopeTryToFind($query, $id){
+    public function scopeFindOrThrow($query, $id){
         if(!$id) return $query;
 
         $model =  $query->whereId($id)->first();
@@ -77,7 +77,7 @@ class BaseModel extends Model
     }
 
     public function uploadImageAndUpdate(array $data, string $imageFieldName='image'){
-        $this->update(self::uploadImage($data, $imageFieldName));
+        return tap($this)->update(self::uploadImage($data, $imageFieldName));
     }
 
     protected static function uploadPath(){

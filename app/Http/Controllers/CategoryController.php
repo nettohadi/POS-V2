@@ -7,7 +7,7 @@ use App\Libs\ApiResponse;
 use App\Models\Category;
 use App\Http\Controllers\Base\BaseController;
 
-class CategoriesController extends BaseController
+class CategoryController extends BaseController
 {
     public function index()
     {
@@ -20,21 +20,21 @@ class CategoriesController extends BaseController
 
     public function show()
     {
-        $category = Category::with('type')->tryToFind(request('category'));
+        $category = Category::with('type')->findOrThrow(request('category'));
         return ApiResponse::make()->data($category)->json();
     }
 
     public function store(CategoryRequest $request)
     {
         $category = Category::create($request->validated());
-        $category = Category::tryToFind($category->id);
+        $category = Category::findOrThrow($category->id);
 
         return ApiResponse::make()->data($category)->isCreated()->json();
     }
 
     public function update(CategoryRequest $request)
     {
-        $category = Category::tryTofind(request('category'));
+        $category = Category::findOrThrow(request('category'));
 
         $category->update($request->validated());
 
@@ -42,7 +42,7 @@ class CategoriesController extends BaseController
     }
 
     public function destroy(){
-        $category = Category::tryToFind(request('category'));
+        $category = Category::findOrThrow(request('category'));
 
         Category::destroy($category->id);
 

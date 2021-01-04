@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Exceptions\ApiAuthorizationException;
 use App\Models\Outlet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,11 +12,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
-class UsersControllerTest extends TestCase
+class UserControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    private $tableName = 'users';
+    public $tableName = 'users';
+    public $routeName = 'users';
+    public $paramName = 'user';
     private $fakeImageName = 'user.jpg';
 
    /** @test **/
@@ -24,21 +27,25 @@ class UsersControllerTest extends TestCase
        $this->withoutExceptionHandling();
 
        /* 1. Setup --------------------------------*/
-       $users = User::factory()->count(10)->create();
+       $this->withAuthorization();
+       User::factory()->count(10)->create();
+       $users = User::take(15)->get()->toArray();
 
-       /* 2. Invoke --------------------------------*/
+           /* 2. Invoke --------------------------------*/
        $response = $this->get(route('users.index'));
 
        /* 3. Assert --------------------------------*/
        $response->assertStatus(200);
-       $this->assertEquals($users->toArray(), $response->json('data'));
+       $this->assertEquals($users, $response->json('data'));
    }
 
    /** @test **/
    public function users_can_be_retrieved_with_pagination()
    {
        /* 1. Setup --------------------------------*/
-       $users = User::factory()->count(10)->create()->take(5)->toArray();
+       $this->withAuthorization();
+       User::factory()->count(10)->create();
+       $users = User::take(5)->get()->toArray();
 
        /* 2. Invoke --------------------------------*/
        $response = $this->get(route('users.index') . '?perPage=5');
@@ -52,6 +59,7 @@ class UsersControllerTest extends TestCase
    public function users_can_be_filtered_by_name()
    {
        /* 1. Setup --------------------------------*/
+       $this->withAuthorization();
 
        //create 2 users with names contain 'abdul'
        $expectedUsers = [];
@@ -73,6 +81,7 @@ class UsersControllerTest extends TestCase
     public function users_will_be_empty_if_names_does_not_match_the_keywords()
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
 
         //Create two users which has the word 'abdul'
 
@@ -102,6 +111,7 @@ class UsersControllerTest extends TestCase
         $this->withoutExceptionHandling();
 
         /*Setup ---------------------------------*/
+        $this->withAuthorization();
         $user = User::factory()->create();
 
         /*Invoke ---------------------------------*/
@@ -119,6 +129,7 @@ class UsersControllerTest extends TestCase
         $this->expectNotFoundException();
 
         /* Setup */
+        $this->withAuthorization();
         $user = User::factory()->create();
 
         /* Invoke */
@@ -137,6 +148,7 @@ class UsersControllerTest extends TestCase
     public function a_user_can_be_created($field, $value)
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
         $user = $this->makeUser();
         $user[$field] = $value;
         /* 2. Invoke ------------------------------ */
@@ -165,6 +177,7 @@ class UsersControllerTest extends TestCase
     public function a_user_can_not_be_created($field, $value)
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
         $user = $this->makeUser();
         $user[$field] = $value;
 
@@ -185,6 +198,7 @@ class UsersControllerTest extends TestCase
     {
         $this->withoutExceptionHandling();
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         //create a fake storage
         Storage::fake('public');
         $data = $this->makeUser();
@@ -209,6 +223,7 @@ class UsersControllerTest extends TestCase
     public function a_user_can_be_updated($field, $value)
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $user = $this->getUserFromDB();
         //edit data
         $user[$field] = $value;
@@ -240,6 +255,7 @@ class UsersControllerTest extends TestCase
     public function a_user_can_not_be_updated($field, $value)
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $user = $this->getUserFromDB();
         //edit data
         $user[$field] = $value;
@@ -260,6 +276,7 @@ class UsersControllerTest extends TestCase
     {
         $this->withoutExceptionHandling();
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         //create a fake storage
         Storage::fake('public');
         $user = $this->makeUser();
@@ -285,6 +302,7 @@ class UsersControllerTest extends TestCase
     public function a_user_can_be_deleted()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $user = User::factory()->create()->toArray();
         $this->removeTimeStamp($user);
 
@@ -306,6 +324,7 @@ class UsersControllerTest extends TestCase
     public function a_user_can_not_be_deleted_if_does_not_exist()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $user = User::factory()->create()->toArray();
         $this->removeTimeStamp($user);
 
@@ -324,6 +343,50 @@ class UsersControllerTest extends TestCase
         $this->assertDatabaseMissing($this->tableName, ['id' => 'no_id']);
         //Just to make sure it exists in database
         $this->assertDatabaseHas($this->tableName,$user);
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     * @param $method*
+     * @param $routeName
+     * @param $param
+     */
+    public function user_can_not_be_accessed_if_unauthenticated($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(401);
+
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     */
+    public function user_can_not_be_accessed_if_unauthorized($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+        $this->withoutExceptionHandling();
+        $this->expectException(ApiAuthorizationException::class);
+
+        //Exclude particular route
+        $this->withAuthorizationExcept([$routeName]);
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(403);
+
+    }
+
+    public function routes(){
+        return $this->getRoutes();
     }
 
     private function getUserFromDB(array $values=[]){

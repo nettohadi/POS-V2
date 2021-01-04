@@ -7,7 +7,7 @@ use App\Libs\ApiResponse;
 use App\Models\Unit;
 use App\Http\Controllers\Base\BaseController;
 
-class UnitsController extends BaseController
+class UnitController extends BaseController
 {
     public function index(){
         $name    = request()->get('name') ?? null;
@@ -19,7 +19,7 @@ class UnitsController extends BaseController
 
     public function show()
     {
-        $unit = Unit::tryToFind(request('unit'));
+        $unit = Unit::findOrThrow(request('unit'));
         return ApiResponse::make()->data($unit)->json();
     }
 
@@ -33,7 +33,7 @@ class UnitsController extends BaseController
 
     public function update(UnitRequest $request){
 
-        $unit = Unit::tryToFind($request->unit);
+        $unit = Unit::findOrThrow($request->unit);
 
         $unit->update($request->validated());
 
@@ -42,7 +42,7 @@ class UnitsController extends BaseController
     }
 
     public function destroy(){
-        $unit = Unit::tryToFind(request('unit'));
+        $unit = Unit::findOrThrow(request('unit'));
 
         Unit::destroy($unit->id);
 

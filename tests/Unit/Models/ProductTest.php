@@ -4,6 +4,7 @@ namespace Tests\Unit\Models;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Recipe;
 use App\Models\Unit;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -96,6 +97,26 @@ class ProductTest extends TestCase
 
         /* 3. Assert --------------------------------*/
         $this->assertEquals($category->name, $product->category->name);
+    }
+
+    /**
+     * @test
+     *
+     * Relationship test
+     **/
+    public function a_product_has_recipes()
+    {
+        $this->withoutExceptionHandling();
+
+        /* 1. Setup --------------------------------*/
+        $product = Product::factory()->create();
+        $expectedRecipes = Recipe::factory()->count(3)->create(['product_id' => $product->id])->toArray();
+
+        /* 2. Invoke --------------------------------*/
+        $recipes = $product->recipes->toArray();
+
+        /* 3. Assert --------------------------------*/
+        $this->assertEquals($expectedRecipes, $recipes);
     }
 
     /**

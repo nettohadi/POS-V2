@@ -10,6 +10,7 @@ class Product extends BaseModel
 {
     use HasFactory;
     public $incrementing = false;
+    protected $keyType = 'string';
     protected $guarded = [];
 
     /**
@@ -43,6 +44,11 @@ class Product extends BaseModel
     //Relationship : Belongs to Category
     public function category(){
         return $this->belongsTo(Category::class);
+    }
+
+    public function recipes()
+    {
+        return $this->hasMany(Recipe::class);
     }
 
     protected static function uploadPath()

@@ -12,7 +12,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class UsersController extends BaseController
+class UserController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -46,7 +46,7 @@ class UsersController extends BaseController
      */
     public function show($id)
     {
-        return ApiResponse::make()->data(User::tryToFind($id))->json();
+        return ApiResponse::make()->data(User::findOrThrow($id))->json();
     }
 
 
@@ -60,7 +60,7 @@ class UsersController extends BaseController
      */
     public function update(UserRequest $request, $id)
     {
-        $user = User::tryToFind($id);
+        $user = User::findOrThrow($id);
         $user->uploadImageAndUpdate($request->validated());
         return ApiResponse::make()->isUpdated($user)->json();
     }
@@ -74,7 +74,7 @@ class UsersController extends BaseController
      */
     public function destroy($id)
     {
-        $user = User::tryToFind($id);
+        $user = User::findOrThrow($id);
 
         $user->delete();
 

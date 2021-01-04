@@ -125,6 +125,21 @@ class ApiResponseTest extends TestCase
     }
 
     /** @test **/
+    public function can_return_unauthorized_response()
+    {
+        /*Invoke*/
+        $jsonResponse = ApiResponse::make()->isNotAuthorized('Unauthorized')->json();
+
+        /*Assert*/
+        $arrayResponse = $jsonResponse->getData(true);
+
+        $this->assertEquals(403,$jsonResponse->getStatusCode());
+        $this->assertArrayHasKeys(['code','message','data'], $arrayResponse);
+        $this->assertArrayNotHasKey('errors', $arrayResponse);
+        $this->assertEquals('Unauthorized',$arrayResponse['message']);
+    }
+
+    /** @test **/
     public function can_return_notAllowed_response()
     {
         /*Invoke*/

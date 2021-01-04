@@ -10,7 +10,7 @@ use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
-class ProductsController extends BaseController
+class ProductController extends BaseController
 {
     /**
      * Return filterable paginated list of product.
@@ -43,7 +43,7 @@ class ProductsController extends BaseController
      */
     public function show($id)
     {
-        return ApiResponse::make()->data(Product::tryToFind($id))->json();
+        return ApiResponse::make()->data(Product::findOrThrow($id))->json();
     }
 
     /**
@@ -54,8 +54,7 @@ class ProductsController extends BaseController
      */
     public function update(ProductRequest $request)
     {
-        $product = Product::tryToFind(request('product'));
-        $product->uploadImageAndUpdate($request->validated());
+        $product = Product::findOrThrow(request('product'))->uploadImageAndUpdate($request->validated());
         return ApiResponse::make()->isUpdated($product)->json();
     }
 
@@ -67,7 +66,7 @@ class ProductsController extends BaseController
      */
     public function destroy()
     {
-        $product = Product::tryToFind(request('product'));
+        $product = Product::findOrThrow(request('product'));
 
         $product->delete();
 

@@ -23,19 +23,19 @@ class CreateProductsTable extends Migration
             $table->string('name_initial',5)->nullable()
                 ->comment("2 or 3 letters which represent product's name");
 
-            $table->integer('unit_id')->comment('one to many relationship with Units table');
+            $table->unsignedBigInteger('unit_id');
 
-            $table->integer('category_id')->comment('one to many relationship with categories table');
+            $table->unsignedBigInteger('category_id');
 
             $table->enum('stock_type',['single','composite'])
                   ->comment("single means product stock is determined by the qty of the product itself,
-                  while composite is determined by the qty of it's ingredient");
+                  while composite is determined by the qty of it's ingredients");
 
             $table->string('primary_ingredient_id',20)
                   ->comment("is used to determine the qty of a composite product.
                   one to many relationship with products table")->nullable();
 
-            $table->bigInteger('primary_ingredient_qty')
+            $table->unsignedBigInteger('primary_ingredient_qty')
                   ->comment("is used to determine the qty of a composite product")->nullable();
 
             $table->boolean('for_sale');

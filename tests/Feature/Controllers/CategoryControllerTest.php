@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Exceptions\ApiAuthorizationException;
 use App\Exceptions\ApiNotFoundException;
 use App\Models\Category;
 use App\Models\Product;
@@ -11,15 +12,18 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Tests\CreatesApplication;
 use Tests\TestCase;
 
-class CategoriesControllerTest extends TestCase
+class CategoryControllerTest extends TestCase
 {
     use  RefreshDatabase, withFaker;
-    private $tableName = 'categories';
+    public $tableName = 'categories';
+    public $routeName = 'categories';
+    public $paramName = 'category';
 
     /** @test **/
     public function categories_can_be_retrieved()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         Type::factory()->count(6)->create();
         $categories = Category::factory()->count(7)->create()->load('type');
 
@@ -42,6 +46,7 @@ class CategoriesControllerTest extends TestCase
     public function categories_can_be_retrieved_with_pagination_default_perpage()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         Type::factory()->count(6)->create();
         $categories = Category::factory()->count(20)->create()
                        ->load('type')->take(10);
@@ -64,6 +69,7 @@ class CategoriesControllerTest extends TestCase
     public function categories_can_be_retrieved_with_pagination_5_perpage()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         Type::factory()->count(6)->create();
         $categories = Category::factory()->count(20)->create()
                       ->load('type')->take(5);
@@ -87,6 +93,7 @@ class CategoriesControllerTest extends TestCase
     {
 
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         Type::factory()->count(6)->create();
         $category = Category::factory()->create()->load('type');
 
@@ -103,6 +110,7 @@ class CategoriesControllerTest extends TestCase
     public function a_category_can_not_be_found()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         Type::factory()->count(6)->create();
         Category::factory()->create()->load('type');
 
@@ -118,6 +126,7 @@ class CategoriesControllerTest extends TestCase
     public function categories_can_be_filtered_by_name()
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
 
         //Create two Categorys which has word 'paket'
         Category::factory()->create([
@@ -143,6 +152,7 @@ class CategoriesControllerTest extends TestCase
     public function a_category_can_be_inserted()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $category = $this->makeCategory();
 
         /* 2. Invoke --------------------------------*/
@@ -169,6 +179,7 @@ class CategoriesControllerTest extends TestCase
     public function name_is_required_during_insert()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $category = $this->makeCategory();
         $category['name'] = '';
 
@@ -195,6 +206,7 @@ class CategoriesControllerTest extends TestCase
     public function desc_is_not_required_during_insert()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $category = $this->makeCategory();
         $category['desc'] = null;
 
@@ -222,6 +234,7 @@ class CategoriesControllerTest extends TestCase
     public function type_is_required_during_insert()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $category = $this->makeCategory();
         $category['type_id'] = null;
 
@@ -249,6 +262,7 @@ class CategoriesControllerTest extends TestCase
     public function type_must_exist_in_database_during_insert()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $category = $this->makeCategory();
         $category['type_id'] = 'random_id';
 
@@ -276,6 +290,9 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function a_category_can_be_updated()
     {
+        /* Setup */
+        $this->withAuthorization();
+
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -286,20 +303,23 @@ class CategoriesControllerTest extends TestCase
         $category['name'] = 'New name';
         $category['desc'] = 'New desc';
 
+        /* Invoke */
         $response = $this->put(route('categories.update',
             ['category' => $category['id']]),
             $category
         );
 
+        /* Assert */
         $response->assertStatus(200);
 
         $result = $response->json('data');
 
+        $this->removeTimeStamp($result);
+        $this->removeTimeStamp($category);
+
         $this->assertNotNull($result);
         $this->assertEquals($category, $result);
 
-        unset($category['created_at']);
-        unset($category['updated_at']);
         $this->assertDatabaseHas($this->tableName,$category);
 
     }
@@ -308,6 +328,7 @@ class CategoriesControllerTest extends TestCase
     public function a_category_can_not_be_updated_if_does_not_exist()
     {
         /** Setup */
+        $this->withAuthorization();
         Type::factory()->create();
         $category = Category::factory()->create(['type_id' => 1])->toArray();
         $category['name'] = 'New name';
@@ -327,6 +348,9 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function name_is_required_during_update()
     {
+        /* Setup */
+        $this->withAuthorization();
+
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -337,11 +361,13 @@ class CategoriesControllerTest extends TestCase
         $category['name'] = '';
         $category['desc'] = 'New desc';
 
+        /* Invoke */
         $response = $this->put(route('categories.update',
             ['category' => $category['id']]),
             $category
         );
 
+        /* Assert */
         $response->assertStatus(400);
 
         $result = $response->json();
@@ -358,6 +384,9 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_is_required_during_update()
     {
+        /* Setup */
+        $this->withAuthorization();
+
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -367,11 +396,13 @@ class CategoriesControllerTest extends TestCase
 
         $category['type_id'] = null;
 
+        /* Invoke */
         $response = $this->put(route('categories.update',
             ['category' => $category['id']]),
             $category
         );
 
+        /* Assert */
         $response->assertStatus(400);
 
         $result = $response->json();
@@ -379,8 +410,7 @@ class CategoriesControllerTest extends TestCase
         $this->assertArrayHasKey('errors',$result);
         $this->assertArrayHasKey('type_id', $result['errors']);
 
-        unset($category['created_at']);
-        unset($category['updated_at']);
+        $this->removeTimeStamp($category);
         $this->assertDatabaseMissing($this->tableName,$category);
 
     }
@@ -388,7 +418,8 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function type_must_exist_in_database_during_update()
     {
-        $type = Type::factory()->create();
+        /* Setup */
+        $this->withAuthorization();
         $category = Category::create([
             'name' => 'name',
             'desc' => 'desc',
@@ -398,11 +429,13 @@ class CategoriesControllerTest extends TestCase
         $category['name'] = '';
         $category['desc'] = 'New desc';
 
+        /* Invoke */
         $response = $this->put(route('categories.update',
             ['category' => $category['id']]),
             $category
         );
 
+        /* Assert */
         $response->assertStatus(400);
 
         $result = $response->json();
@@ -410,8 +443,7 @@ class CategoriesControllerTest extends TestCase
         $this->assertArrayHasKey('errors',$result);
         $this->assertArrayHasKey('type_id', $result['errors']);
 
-        unset($category['created_at']);
-        unset($category['updated_at']);
+        $this->removeTimeStamp($category);
         $this->assertDatabaseMissing($this->tableName,$category);
 
     }
@@ -419,6 +451,9 @@ class CategoriesControllerTest extends TestCase
     /** @test **/
     public function desc_is_not_required_during_update()
     {
+        /* Setup */
+        $this->withAuthorization();
+
         $type = Type::factory()->create();
         $category = Category::create([
             'name' => 'name',
@@ -429,11 +464,13 @@ class CategoriesControllerTest extends TestCase
         $category['name'] = 'New Name';
         $category['desc'] = null;
 
+        /* Invoke */
         $response = $this->put(route('categories.update',
             ['category' => $category['id']]),
             $category
         );
 
+        /* Assert */
         $response->assertStatus(200);
 
         $result = $response->json('data');
@@ -452,6 +489,7 @@ class CategoriesControllerTest extends TestCase
     public function a_category_can_be_deleted()
     {
         /* Setup -----------------------------------------------*/
+        $this->withAuthorization();
         $category = Category::factory()->create();
 
         /* Invoke -----------------------------------------------*/
@@ -467,6 +505,7 @@ class CategoriesControllerTest extends TestCase
     public function a_category_can_not_be_deleted_if_does_not_exist()
     {
         /* Setup -----------------------------------------------*/
+        $this->withAuthorization();
         $category = Category::factory()->create();
 
         /* Invoke -----------------------------------------------*/
@@ -482,8 +521,10 @@ class CategoriesControllerTest extends TestCase
     public function a_category_can_not_be_deleted_if_has_one_or_more_products()
     {
         /* 1.Setup ----------------------------------------------------------*/
+        $this->withAuthorization();
+        $this->withAuthorization();
         $category = Category::factory()->create()->toArray();
-        Product::factory()->count(1)->create(['category_id' => $category['id']]);
+        Product::factory()->create(['category_id' => $category['id']]);
 
         /* 2.Invoke ----------------------------------------------------------*/
         $response = $this->delete(route('categories.destroy',['category'=> $category['id']]));
@@ -514,7 +555,49 @@ class CategoriesControllerTest extends TestCase
         return $category;
     }
 
+    /**
+     * @test
+     * @dataProvider routes
+     * @param $method*
+     * @param $routeName
+     * @param $param
+     */
+    public function category_can_not_be_accessed_if_unauthenticated($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
 
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(401);
+
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     */
+    public function category_can_not_be_accessed_if_unauthorized($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+        $this->withoutExceptionHandling();
+        $this->expectException(ApiAuthorizationException::class);
+
+        //Exclude particular route
+        $this->withAuthorizationExcept([$routeName]);
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(403);
+
+    }
+
+    public function routes(){
+        return $this->getRoutes();
+    }
 
 
 

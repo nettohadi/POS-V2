@@ -43,11 +43,31 @@ class User extends BaseUser
         self::creating(function ($model){self::CheckBeforeCreation($model);});
     }
 
+    public function getToken($password, $deviceName='device_x'){
+        $this->checkPassword($password);
+        return $this->createToken($deviceName)->plainTextToken;
+    }
+
     public function scopeFilterByName($query, $name){
 
         if(!$name) return $query;
 
         return $query->where("name","like","%{$name}%");
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class)->withTimestamps();
+    }
+
+    public function assignRole($role)
+    {
+        $this->roles()->sync($role,false);
+    }
+
+    public function permissions()
+    {
+        return $this->roles->map->permissions->flatten()->pluck('name')->unique();
     }
 
     public static function checkBeforeCreation($model)

@@ -2,30 +2,32 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Exceptions\ApiAuthorizationException;
 use App\Models\Product;
 use App\Models\Unit;
-use Database\Factories\UnitFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class UnitsControllerTest extends TestCase
+class UnitControllerTest extends TestCase
 {
     use RefreshDatabase, withFaker;
-    private $tableName = 'units';
+    public $tableName = 'units';
+    public $routeName = 'units';
+    public $paramName = 'unit';
 
-    function __construct()
-    {
-        parent::__construct();
-    }
 
     /** @test **/
     public function units_can_be_retrieved()
     {
+        /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $units = Unit::factory()->count(7)->create();
 
+        /* 2. Invoke --------------------------------*/
         $response = $this->get(route('units.index'));
 
+        /* 3. Assert --------------------------------*/
         $response->assertStatus(200);
         $this->assertCount(7,$response->json('data'));
         $this->assertEquals($units->toArray(), $response->json('data'));
@@ -41,6 +43,7 @@ class UnitsControllerTest extends TestCase
     public function units_can_be_retrieved_with_pagination_default_perpage()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $units = Unit::factory()->count(20)->create();
 
         /* 2. Invoke --------------------------------*/
@@ -64,6 +67,7 @@ class UnitsControllerTest extends TestCase
     public function units_can_be_retrieved_with_pagination_5_perpage()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $units = Unit::factory()->count(20)->create();
 
         /* 2. Invoke --------------------------------*/
@@ -87,6 +91,7 @@ class UnitsControllerTest extends TestCase
     public function units_can_be_filtered_by_name()
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
 
         //Create two Units which has word 'liter'
         Unit::factory()->create([
@@ -111,10 +116,14 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_be_found()
     {
+        /* Setup */
+        $this->withAuthorization();
         $unit = Unit::factory()->create();
 
+        /* Invoke */
         $response = $this->get(route('units.show',['unit' => $unit->id]));
 
+        /* Assert */
         $response->assertStatus(200);
         $this->assertEquals($unit->toArray(),$response->json('data'));
 
@@ -125,6 +134,7 @@ class UnitsControllerTest extends TestCase
     {
 
         /* Setup */
+        $this->withAuthorization();
         $unit = Unit::factory()->create();
 
         /* Invoke */
@@ -139,12 +149,15 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function a_unit_can_be_inserted()
     {
-
+        /* Setup */
+        $this->withAuthorization();
         $unit['name'] = $this->faker->name;
         $unit['desc'] = $this->faker->sentence(3);
 
+        /* Invoke */
         $response = $this->post(route('units.store'),$unit);
 
+        /* Assert */
         $response->assertStatus(201);
         $this->assertDatabaseHas($this->tableName,$unit);
     }
@@ -154,6 +167,7 @@ class UnitsControllerTest extends TestCase
     {
 
         /* Setup */
+        $this->withAuthorization();
         $unit['name'] = null;
         $unit['desc'] = $this->faker->sentence(3);
 
@@ -169,13 +183,14 @@ class UnitsControllerTest extends TestCase
     public function desc_is_not_required_during_insert(){
 
         /* Setup */
+        $this->withAuthorization();
         $unit['name'] = $this->faker->name;
         $unit['desc'] = null;
 
         /* Invoke */
         $response = $this->post(route('units.store'),$unit);
 
-        /* Setup */
+        /* Assert */
         $response->assertStatus(201);
         $this->assertDatabaseHas($this->tableName, $unit);
     }
@@ -184,16 +199,21 @@ class UnitsControllerTest extends TestCase
     public function a_unit_can_be_updated()
     {
 
+        /* Setup */
+        $this->withAuthorization();
+
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = 'New name';
         $unit['desc'] = 'New desc';
 
+        /* Invoke */
         $response = $this->put(route('units.update',
             ['unit' => $unit['id']]),
             $unit
         );
 
 
+        /* Assert */
         $response->assertStatus(200);
         $this->assertNotNull($response->json('data'));
         $this->assertEquals($unit['name'], $response->json('data')['name']);
@@ -208,6 +228,7 @@ class UnitsControllerTest extends TestCase
     {
 
         /* Setup */
+        $this->withAuthorization();
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = 'New name';
         $unit['desc'] = 'New desc';
@@ -228,6 +249,7 @@ class UnitsControllerTest extends TestCase
     public function name_is_required_during_update(){
 
         /* Setup */
+        $this->withAuthorization();
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = null;
         $unit['desc'] = 'New desc';
@@ -247,16 +269,19 @@ class UnitsControllerTest extends TestCase
     /** @test **/
     public function desc_is_not_required_during_update(){
 
-
+        /* Setup */
+        $this->withAuthorization();
         $unit['id'] = Unit::factory()->create()->id;
         $unit['name'] = 'New name';
         $unit['desc'] = null;
 
+        /* Invoke */
         $response = $this->put(route('units.update',
             ['unit' => $unit['id']]),
             $unit
         );
 
+        /* Assert */
         $response->assertStatus(200);
         $this->assertEquals($unit['name'],$response->json('data')['name']);
         $this->assertEquals($unit['desc'],$response->json('data')['desc']);
@@ -269,10 +294,14 @@ class UnitsControllerTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
+        /* Setup */
+        $this->withAuthorization();
         $unit = Unit::factory()->create();
 
+        /* Invoke */
         $response = $this->delete(route('units.destroy',['unit'=>$unit->id]));
 
+        /* Assert */
         $response->assertStatus(200);
         $this->assertDatabaseMissing($this->tableName, $unit->makeHidden(['created_at','updated_at'])
              ->toArray());
@@ -282,6 +311,7 @@ class UnitsControllerTest extends TestCase
     public function a_unit_can_not_be_deleted_if_does_not_exist()
     {
         /* Setup */
+        $this->withAuthorization();
         $unit = Unit::factory()->create();
 
         /* Invoke */
@@ -295,6 +325,7 @@ class UnitsControllerTest extends TestCase
     public function a_unit_can_not_be_deleted_if_has_one_or_more_products()
     {
         /* 1.Setup ----------------------------------------------------------*/
+        $this->withAuthorization();
         $unit = Unit::factory()->create()->toArray();
         Product::factory()->count(1)->create(['unit_id' => $unit['id']]);
 
@@ -310,5 +341,49 @@ class UnitsControllerTest extends TestCase
         $this->assertDatabaseHas($this->tableName, $unit);
         /* 3.3 Exception ---------------------------------------------------------*/
 
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     * @param $method*
+     * @param $routeName
+     * @param $param
+     */
+    public function unit_can_not_be_accessed_if_unauthenticated($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(401);
+
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     */
+    public function unit_can_not_be_accessed_if_unauthorized($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+        $this->withoutExceptionHandling();
+        $this->expectException(ApiAuthorizationException::class);
+
+        //Exclude particular route
+        $this->withAuthorizationExcept([$routeName]);
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(403);
+
+    }
+
+    public function routes(){
+        return $this->getRoutes();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Exceptions\ApiAuthorizationException;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Unit;
@@ -13,11 +14,14 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
-class ProductsControllerTest extends TestCase
+class ProductControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    private $tableName = 'products';
+    public $tableName = 'products';
+    public $routeName = 'products';
+    public $paramName = 'product';
+
     private $fakeImageName = 'product.jpg';
     private $fakeImagePath = '/products/';
 
@@ -25,6 +29,7 @@ class ProductsControllerTest extends TestCase
     public function products_can_be_retrieved()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $products = Product::factory()->count(3)->create();
 
         /* 2. Invoke --------------------------------*/
@@ -39,6 +44,7 @@ class ProductsControllerTest extends TestCase
     public function products_can_be_retrieved_using_pagination()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $products = Product::factory()->count(10)->create();
 
         /* 2. Invoke --------------------------------*/
@@ -54,6 +60,7 @@ class ProductsControllerTest extends TestCase
     public function products_can_be_filtered_by_name()
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
 
         $expectedProducts = [];
 
@@ -81,6 +88,7 @@ class ProductsControllerTest extends TestCase
     public function products_will_be_empty_if_names_does_not_match_the_keywords()
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
 
         //Create two Products which has the word 'Ayam'
 
@@ -108,6 +116,7 @@ class ProductsControllerTest extends TestCase
     public function a_product_can_be_found()
     {
         /*Setup ---------------------------------*/
+        $this->withAuthorization();
         $product = Product::factory()->create();
 
         /*Invoke ---------------------------------*/
@@ -123,6 +132,7 @@ class ProductsControllerTest extends TestCase
     public function a_product_can_not_be_found()
     {
         /* Setup */
+        $this->withAuthorization();
         $product = Product::factory()->create();
 
         /* Invoke */
@@ -141,6 +151,7 @@ class ProductsControllerTest extends TestCase
     public function a_product_can_be_created($field, $value)
     {
         /* 1. Setup ------------------------------ */
+        $this->withAuthorization();
         $product = $this->makeProduct();
         $product[$field] = $value;
 
@@ -172,6 +183,7 @@ class ProductsControllerTest extends TestCase
     {
         $this->withoutExceptionHandling();
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         //create a fake storage
         Storage::fake('public');
         $data = $this->makeProduct();
@@ -196,6 +208,7 @@ class ProductsControllerTest extends TestCase
     public function a_product_can_not_be_created($field, $value)
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $product = $this->makeProduct();
         $product[$field] = $value;
 
@@ -218,8 +231,8 @@ class ProductsControllerTest extends TestCase
      */
     public function a_product_can_be_updated($field, $value)
     {
-        $this->withoutExceptionHandling();
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $initialImage = UploadedFile::fake()->image($this->fakeImageName);
         $product = $this->getProductFromDB(['image' => $initialImage]);
         //edit data
@@ -230,11 +243,12 @@ class ProductsControllerTest extends TestCase
 
         /* 3. Assert --------------------------------*/
         /* 3.1 Response --------------------------------*/
+//        dd($response);
         $response->assertStatus(200);
 
         $data = $response->json('data');
 
-        //remove image $ timestamp because we can not compare them-------
+        //remove image & timestamp because we can not compare them-------
         $this->removeTimeStampAndImage($data);
         $this->removeTimeStampAndImage($product);
         //---------------------------------------------------
@@ -252,6 +266,7 @@ class ProductsControllerTest extends TestCase
     public function a_product_can_not_be_updated($field, $value)
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $initialImage = $this->fakeImagePath.$this->fakeImageName;
         $product = $this->getProductFromDB(['image' => $initialImage]);
         //edit data
@@ -276,6 +291,7 @@ class ProductsControllerTest extends TestCase
         $this->withoutExceptionHandling();
 
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         //create a fake storage
         Storage::fake('public');
         //add fake image file
@@ -298,6 +314,7 @@ class ProductsControllerTest extends TestCase
     public function a_product_image_should_not_change_if_no_image_is_uploaded_during_update()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $initialImage = $this->fakeImagePath.$this->fakeImageName;
         $product = $this->getProductFromDB(['image' => $initialImage]);
 
@@ -317,6 +334,7 @@ class ProductsControllerTest extends TestCase
     {
 
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $product = $this->makeProduct();
 
         /* 2. Invoke --------------------------------*/
@@ -334,6 +352,7 @@ class ProductsControllerTest extends TestCase
     public function a_product_can_be_deleted()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $product = Product::factory()->create()->toArray();
         $this->removeTimeStamp($product);
 
@@ -355,6 +374,7 @@ class ProductsControllerTest extends TestCase
     public function a_product_can_not_be_deleted_if_does_not_exist()
     {
         /* 1. Setup --------------------------------*/
+        $this->withAuthorization();
         $product = Product::factory()->create()->toArray();
         $this->removeTimeStamp($product);
 
@@ -371,6 +391,50 @@ class ProductsControllerTest extends TestCase
 
         /* 3.2 Database --------------------------------*/
         $this->assertDatabaseMissing($this->tableName, ['id' => 'no_id']);
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     * @param $method*
+     * @param $routeName
+     * @param $param
+     */
+    public function product_can_not_be_accessed_if_unauthenticated($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(401);
+
+    }
+
+    /**
+     * @test
+     * @dataProvider routes
+     */
+    public function product_can_not_be_accessed_if_unauthorized($method, $routeName, $param)
+    {
+        /* 1. Setup --------------------------------*/
+        $this->withoutExceptionHandling();
+        $this->expectException(ApiAuthorizationException::class);
+
+        //Exclude particular route
+        $this->withAuthorizationExcept([$routeName]);
+
+        /* 2. Invoke --------------------------------*/
+        $response = $this->call($method,route($routeName,$param));
+
+        /* 3. Assert --------------------------------*/
+        $response->assertStatus(403);
+
+    }
+
+    public function routes(){
+        return $this->getRoutes();
     }
 
     private function getProductFromDB(array $valuesToInclude=[]){
